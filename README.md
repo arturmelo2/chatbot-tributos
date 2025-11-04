@@ -35,7 +35,6 @@ curl http://localhost:5000/health
 - ✅ **Multi-Provider LLM**: Groq (Llama 3.3), OpenAI (GPT-4o), xAI (Grok)
 - ✅ **Histórico de Conversa**: Contexto mantido por usuário
 - ✅ **Menu Interativo**: Rotas para links úteis (IPTU, Certidões, etc.)
-- ✅ **Métricas Prometheus**: Monitoramento completo de performance
 - ✅ **Structured Logging**: Logs em JSON para análise
 - ✅ **Auto-start Windows**: Inicialização automática via Scheduled Task
 
@@ -65,22 +64,7 @@ curl http://localhost:5000/health
 ./scripts/uninstall-auto-start.ps1                 # Remover auto-start
 ```
 
-## 📊 Observabilidade
-
-### Métricas Prometheus
-
-Acesse `http://localhost:5000/metrics` para ver:
-
-- `http_requests_total` - Total de requisições HTTP por endpoint
-- `http_request_duration_seconds` - Latência de requisições
-- `chatbot_messages_total` - Mensagens processadas (success/error/ignored)
-- `chatbot_response_time_seconds` - Tempo de resposta do bot
-- `rag_queries_total` - Consultas ao sistema RAG
-- `rag_documents_retrieved` - Documentos recuperados por query
-- `waha_api_calls_total` - Chamadas à API do WAHA
-- `waha_api_errors_total` - Erros na integração WAHA
-
-### Logs Estruturados
+## 📊 Logs Estruturados
 
 Logs em formato JSON com campos:
 
@@ -150,7 +134,6 @@ whatsapp-ai-chatbot/
 │   ├── config.py          # Configuração centralizada
 │   ├── logging_setup.py   # Setup de logging
 │   ├── structured_logging.py  # Logging JSON
-│   ├── metrics.py         # Métricas Prometheus
 │   ├── waha.py            # Cliente WAHA API
 │   └── version.py         # Versionamento
 ├── rag/

@@ -7,7 +7,6 @@ from typing import Any, Dict, List
 import requests
 
 from services.config import get_settings
-from services.metrics import record_waha_call
 
 logger = logging.getLogger(__name__)
 
@@ -37,10 +36,9 @@ class Waha:
         try:
             resp = requests.post(url, json=payload, headers=self._headers(), timeout=self.__timeout)
             resp.raise_for_status()
-            record_waha_call("sendText", "success")
+            logger.debug(f"Mensagem enviada para {chat_id}")
         except Exception as e:
             logger.error(f"Falha ao enviar mensagem para {chat_id}: {e}")
-            record_waha_call("sendText", "error", type(e).__name__)
             raise
 
     def get_history_messages(self, chat_id: str, limit: int) -> List[Dict[str, str]]:
@@ -58,7 +56,6 @@ class Waha:
 
             if resp.status_code == 401:
                 logger.warning("WAHA retornou 401 ao buscar histórico. Configure WAHA_API_KEY.")
-                record_waha_call("getHistory", "error", "Unauthorized")
                 return []
 
             resp.raise_for_status()
@@ -79,11 +76,10 @@ class Waha:
                 role = "assistant" if m.get("fromMe") else "user"
                 history.append({"role": role, "content": body})
 
-            record_waha_call("getHistory", "success")
+            logger.debug(f"Histórico obtido para {chat_id}: {len(history)} mensagens")
             return history
         except Exception as e:
             logger.warning(f"Falha ao obter histórico de {chat_id}: {e}")
-            record_waha_call("getHistory", "error", type(e).__name__)
             return []
 
     def list_chats(self, limit: int = 1000) -> List[Dict[str, Any]]:
@@ -103,14 +99,13 @@ class Waha:
                 resp = requests.get(url, headers=self._headers(), timeout=self.__timeout)
                 if resp.status_code == 401:
                     logger.warning("WAHA retornou 401 ao listar chats. Configure WAHA_API_KEY.")
-                    record_waha_call("listChats", "error", "Unauthorized")
                     return []
                 if resp.status_code >= 400:
                     logger.debug(f"list_chats: endpoint {url} retornou {resp.status_code}")
                     continue
 
                 data: Any = resp.json()
-                record_waha_call("listChats", "success")
+                logger.debug(f"Chats listados: {len(data) if isinstance(data, list) else 'N/A'}")
                 if isinstance(data, dict):
                     result: List[Dict[str, Any]] = data.get("result", []) or data.get("chats", [])
                     return result
@@ -120,7 +115,6 @@ class Waha:
                 continue
 
         logger.warning("Falha ao listar chats: todos os endpoints testados retornaram erro")
-        record_waha_call("listChats", "error", "AllEndpointsFailed")
         return []
 
     def get_messages(

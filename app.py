@@ -6,18 +6,12 @@ Aplicação Flask com integração WhatsApp via WAHA.
 import json
 import logging
 import time
-from functools import wraps
 
-from flask import Flask, Response, jsonify, request
+from flask import Flask, jsonify, request
 
 from bot.ai_bot import AIBot
 from services.config import get_settings
 from services.logging_setup import setup_logging
-from services.metrics import (
-    get_metrics,
-    record_chatbot_message,
-    record_request,
-)
 from services.version import __version__
 from services.waha import Waha
 
@@ -41,36 +35,9 @@ ENVIRONMENT = settings.ENVIRONMENT
 
 
 # =============================================================================
-# Middleware de Métricas
-# =============================================================================
-def track_metrics(f):
-    """Decorator para rastrear métricas de requisições."""
-
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        start_time = time.time()
-        method = request.method
-        endpoint = request.path
-
-        try:
-            response = f(*args, **kwargs)
-            status = response[1] if isinstance(response, tuple) else 200
-            duration = time.time() - start_time
-            record_request(method, endpoint, status, duration)
-            return response
-        except Exception as e:
-            duration = time.time() - start_time
-            record_request(method, endpoint, 500, duration)
-            raise e
-
-    return decorated_function
-
-
-# =============================================================================
 # Health Check Endpoint
 # =============================================================================
 @app.route("/health", methods=["GET"])
-@track_metrics
 def health():
     """Endpoint de health check para Docker e monitoramento."""
     try:
@@ -91,19 +58,9 @@ def health():
 
 
 # =============================================================================
-# Metrics Endpoint (Prometheus)
-# =============================================================================
-@app.route("/metrics", methods=["GET"])
-def metrics():
-    """Endpoint de métricas para Prometheus."""
-    return Response(get_metrics(), mimetype="text/plain")
-
-
-# =============================================================================
 # Webhook do WhatsApp (WAHA)
 # =============================================================================
 @app.route("/chatbot/webhook/", methods=["POST"])
-@track_metrics
 def webhook():
     """Recebe mensagens do WAHA e processa com o chatbot."""
     start_time = time.time()
@@ -170,7 +127,6 @@ def webhook():
         is_group = "@g.us" in chat_id
         if is_group:
             logger.info(f"Mensagem de grupo ignorada: {chat_id}")
-            record_chatbot_message("ignored")
             return jsonify({"status": "success", "message": "Mensagem de grupo ignorada"}), 200
 
         logger.info(f"📨 Nova mensagem de {chat_id}: {received_message[:50]}...")
@@ -202,21 +158,12 @@ def webhook():
             # Garante que o typing é interrompido mesmo em caso de erro
             waha.stop_typing(chat_id=chat_id)
 
-        logger.info(f"✅ Resposta enviada para {chat_id}")
-
-        # Registrar métrica de sucesso
-        response_time = time.time() - start_time
-        record_chatbot_message("success", response_time)
+        logger.info(f"✅ Resposta enviada para {chat_id} em {time.time() - start_time:.2f}s")
 
         return jsonify({"status": "success"}), 200
 
     except Exception as e:
         logger.error(f"❌ Erro ao processar webhook: {e}", exc_info=True)
-
-        # Registrar métrica de erro
-        response_time = time.time() - start_time
-        record_chatbot_message("error", response_time)
-
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
@@ -224,7 +171,6 @@ def webhook():
 # Rota Principal (info da API)
 # =============================================================================
 @app.route("/", methods=["GET"])
-@track_metrics
 def index():
     """Página inicial com informações da API."""
     return jsonify(
@@ -236,7 +182,6 @@ def index():
             "endpoints": {
                 "health": "/health",
                 "webhook": "/chatbot/webhook/",
-                "metrics": "/metrics",
             },
         }
     ), 200
