@@ -1,0 +1,94 @@
+services:
+  waha:
+    image: devlikeapro/waha:latest
+    container_name: tributos_waha
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      - WHATSAPP_HOOK_URL=http://n8n:5678/webhook/8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b/waha
+      - WHATSAPP_HOOK_EVENTS=message,session.status
+      - HOST=0.0.0.0
+      - WAHA_API_KEY=tributos_nova_trento_2025_api_key_fixed
+      - WAHA_DASHBOARD_USERNAME=admin
+      - WAHA_DASHBOARD_PASSWORD=Tributos@NovaTrento2025
+    volumes:
+      - waha_data:/app/.waha
+    networks:
+      - tributos_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: tributos_n8n
+    restart: unless-stopped
+    ports:
+      - '5679:5678'
+    environment:
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://n8n:5678/
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - NODE_OPTIONS=--max-old-space-size=2048
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/home/node/.n8n/workflows:ro
+    networks:
+      - tributos_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5678/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  api:
+    image: arturmdmm/whatsapp-ai-chatbot:1.0.0
+    container_name: tributos_api
+    restart: unless-stopped
+    ports:
+      - '5000:5000'
+    volumes:
+      - chroma_data:/app/chroma_data
+      - ./logs:/app/logs
+      - ./rag/data:/app/rag/data:ro
+      - ./exports:/app/exports
+    env_file:
+      - .env
+    environment:
+      - CHROMA_DIR=/app/chroma_data
+      - WAHA_API_URL=http://waha:3000
+      - WAHA_API_KEY=tributos_nova_trento_2025_api_key_fixed
+      - PORT=5000
+      - ENVIRONMENT=production
+    depends_on:
+      waha:
+        condition: service_started
+    networks:
+      - tributos_network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  chroma_data:
+    driver: local
+  waha_data:
+    driver: local
+  n8n_data:
+    driver: local
+
+networks:
+  tributos_network:
+    driver: bridge

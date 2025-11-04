@@ -109,6 +109,31 @@ docker-compose exec api python rag/load_knowledge.py
 
 ## 🐳 Deployment Docker (Produção)
 
+### Usando imagem publicada (sem build)
+
+Para subir rapidamente usando a imagem pública multi-arquitetura já publicada no Docker Hub:
+
+```bash
+# Login opcional (se o repositório for privado)
+docker login
+
+# Subir a stack de produção (usa compose.prod.yml)
+docker compose -f compose.prod.yml up -d
+
+# Verificar status
+docker compose -f compose.prod.yml ps
+```
+
+- A API usará a imagem: `arturmdmm/whatsapp-ai-chatbot:1.0.0` (versão fixada)
+- Configure o `.env` com sua `GROQ_API_KEY`/`OPENAI_API_KEY` antes de subir
+- Para atualizar para uma nova versão, edite `compose.prod.yml` e troque a tag
+
+Opcional (Windows): use o script PowerShell para iniciar a stack de produção:
+
+```powershell
+./scripts/up-prod.ps1
+```
+
 ### 1. Preparação do Servidor
 
 ```bash
@@ -151,6 +176,8 @@ docker-compose ps
 # Ver logs
 docker-compose logs -f
 ```
+
+Observação: quando usar `compose.prod.yml`, você não precisa rodar build no servidor.
 
 ### 4. Configuração do n8n
 
