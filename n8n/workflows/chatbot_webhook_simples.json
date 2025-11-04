@@ -5,7 +5,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "waha-webhook",
-        "responseMode": "responseNode",
+        "responseMode": "lastNode",
         "options": {}
       },
       "id": "webhook-trigger",
@@ -37,22 +37,6 @@
       "position": [
         460,
         300
-      ]
-    },
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "={{ $('Webhook').item.json.body.payload?.from || $('Webhook').item.json.body.from }}",
-        "responseMode": "lastNode",
-        "options": {}
-      },
-      "id": "response",
-      "name": "Respond to Webhook",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1.1,
-      "position": [
-        1460,
-        180
       ]
     },
     {
@@ -212,17 +196,6 @@
         [
           {
             "node": "Return OK",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Return OK": {
-      "main": [
-        [
-          {
-            "node": "Respond to Webhook",
             "type": "main",
             "index": 0
           }
