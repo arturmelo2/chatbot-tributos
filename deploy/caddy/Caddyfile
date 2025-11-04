@@ -1,0 +1,33 @@
+{
+    email {$LETSENCRYPT_EMAIL}
+}
+
+{$DOMAIN} {
+    encode zstd gzip
+    @api path /api* /health
+    handle @api {
+        reverse_proxy api:5000
+    }
+
+    @waha path /waha* {
+    }
+    handle @waha {
+        reverse_proxy waha:3000
+    }
+
+    @n8n path /n8n* {
+    }
+    handle @n8n {
+        reverse_proxy n8n:5679
+    }
+
+    # fallback 404 to avoid exposing anything else
+    handle {
+        respond 404
+    }
+}
+
+# Optional: redirect HTTP to HTTPS if Caddy receives plain HTTP on other hosts
+http://{$DOMAIN} {
+    redir https://{$DOMAIN}{uri} 308
+}
