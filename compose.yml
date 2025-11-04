@@ -1,6 +1,12 @@
 # =============================================================================
 # Docker Compose - Chatbot de Tributos Nova Trento/SC
 # =============================================================================
+#
+# MODOS DE OPERAÇÃO:
+# 1. n8n Completo (recomendado): docker compose up -d waha n8n
+# 2. Com API Python (avançado): docker compose up -d
+#
+# =============================================================================
 
 services:
   # ---------------------------------------------------------------------------
@@ -46,8 +52,15 @@ services:
       - N8N_PROTOCOL=http
       - WEBHOOK_URL=http://n8n:5678/
       - GENERIC_TIMEZONE=America/Sao_Paulo
+      # Variáveis para integração com LLMs
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      # Aumentar limite de memória para workflows complexos
+      - NODE_OPTIONS=--max-old-space-size=2048
     volumes:
       - n8n_data:/home/node/.n8n
+      # Mapear workflows para fácil importação
+      - ./n8n/workflows:/home/node/.n8n/workflows:ro
     networks:
       - tributos_network
     healthcheck:
@@ -58,7 +71,10 @@ services:
       start_period: 40s
 
   # ---------------------------------------------------------------------------
-  # API - Chatbot Application
+  # API - Chatbot Application (OPCIONAL - use apenas para casos avançados)
+  # ---------------------------------------------------------------------------
+  # Para chatbot completo em n8n, não é necessário iniciar este container
+  # Inicie apenas se precisar de lógica Python customizada
   # ---------------------------------------------------------------------------
   api:
     build:
