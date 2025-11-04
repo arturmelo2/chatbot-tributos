@@ -16,30 +16,20 @@
 
     @waha path /waha*
     handle @waha {
-        # Protege o dashboard do WAHA com Basic Auth (opcional)
-        @needAuth {
-            not {
-                header Authorization *
-            }
-        }
-        basicauth @needAuth {
-            {$WAHA_USER} {$WAHA_PASSWORD_HASH}
-        }
+        # Para proteger com Basic Auth, descomente o bloco abaixo e defina WAHA_USER e WAHA_PASSWORD_HASH no .env
+        # basicauth {
+        #     {$WAHA_USER} {$WAHA_PASSWORD_HASH}
+        # }
         reverse_proxy waha:3000
     }
 
     @n8n path /n8n*
     handle @n8n {
-        # Protege o n8n com Basic Auth (opcional)
-        @needAuthN8N {
-            not {
-                header Authorization *
-            }
-        }
-        basicauth @needAuthN8N {
-            {$N8N_USER} {$N8N_PASSWORD_HASH}
-        }
-        reverse_proxy n8n:5679
+        # Para proteger com Basic Auth, descomente o bloco abaixo e defina N8N_USER e N8N_PASSWORD_HASH no .env
+        # basicauth {
+        #     {$N8N_USER} {$N8N_PASSWORD_HASH}
+        # }
+        reverse_proxy n8n:5678
     }
 
     # fallback: se nada casar, serve estático (index.html)
