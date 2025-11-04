@@ -6,12 +6,36 @@ Sistema de chatbot inteligente para atendimento automatizado sobre tributos muni
 
 ## 🚀 Início Rápido (Docker)
 
+### Opção 1: Chatbot Completo em n8n (Recomendado)
+
+```bash
+# 1. Configurar variáveis de ambiente
+cp .env.example .env
+# Editar .env com suas credenciais (GROQ_API_KEY ou OPENAI_API_KEY)
+
+# 2. Iniciar apenas WAHA e n8n
+./scripts/up-n8n.ps1
+
+# 3. Configurar n8n
+# - Acesse http://localhost:5679
+# - Crie conta
+# - Instale community nodes: @n8n/n8n-nodes-langchain, n8n-nodes-waha
+# - Importe workflow: n8n/workflows/chatbot_completo_n8n.json
+# - Configure credenciais Groq/OpenAI
+# - Ative o workflow
+
+# 4. Testar
+# Envie mensagem pelo WhatsApp conectado ao WAHA
+```
+
+### Opção 2: Com API Python (Avançado)
+
 ```bash
 # 1. Configurar variáveis de ambiente
 cp .env.example .env
 # Editar .env com suas credenciais
 
-# 2. Iniciar serviços
+# 2. Iniciar todos os serviços
 ./scripts/up.ps1
 
 # 3. Carregar base de conhecimento
@@ -26,8 +50,9 @@ curl http://localhost:5000/health
 - **Docker Desktop** (com Docker Compose v2)
 - **PowerShell** (scripts de automação)
 - Chaves de API:
-  - Groq/OpenAI/xAI (LLM provider)
-  - WAHA API (WhatsApp)
+  - **Modo n8n**: Groq ou OpenAI (para LLM)
+  - **Modo Python**: Groq/OpenAI/xAI (LLM provider)
+  - WAHA API (WhatsApp) - fixada no projeto
 
 ## 🎯 Funcionalidades
 
@@ -40,23 +65,34 @@ curl http://localhost:5000/health
 
 ## 🛠️ Scripts PowerShell
 
-### Gerenciamento de Serviços
+### Modo n8n (Recomendado)
 
 ```bash
-./scripts/up.ps1                # Iniciar serviços
-./scripts/rebuild.ps1           # Rebuild completo (limpa volumes)
-./scripts/logs-api.ps1          # Ver logs da API
+./scripts/up-n8n.ps1           # Iniciar WAHA + n8n
 ./scripts/waha-status.ps1       # Status do WAHA
 ```
 
-### Base de Conhecimento
+### Modo Python (Avançado)
+
+```bash
+./scripts/up.ps1                # Iniciar todos os serviços
+./scripts/rebuild.ps1           # Rebuild completo (limpa volumes)
+./scripts/logs-api.ps1          # Ver logs da API
+```
+
+### Gerais
 
 ```bash
 ./scripts/load-knowledge.ps1    # Carregar documentos no ChromaDB
 ./scripts/export-history.ps1    # Exportar conversas do WAHA
+### Gerais
+
+```bash
+./scripts/load-knowledge.ps1    # Carregar documentos no ChromaDB (modo Python)
+./scripts/export-history.ps1    # Exportar conversas do WAHA
 ```
 
-### Desenvolvimento
+### Desenvolvimento (Modo Python)
 
 ```bash
 ./scripts/test.ps1              # Executar lint e testes
@@ -126,9 +162,12 @@ pytest --cov=. --cov-report=html
 
 ```
 whatsapp-ai-chatbot/
-├── app.py                  # Aplicação Flask principal
+├── n8n/
+│   └── workflows/
+│       └── chatbot_completo_n8n.json  # Workflow n8n completo
+├── app.py                  # Aplicação Flask (opcional)
 ├── bot/
-│   ├── ai_bot.py          # RAG + LLM chatbot
+│   ├── ai_bot.py          # RAG + LLM chatbot (modo Python)
 │   └── link_router.py     # Roteamento de menus
 ├── services/
 │   ├── config.py          # Configuração centralizada
@@ -143,11 +182,7 @@ whatsapp-ai-chatbot/
 │       ├── leis/
 │       ├── manuais/
 │       └── procedimentos/
-├── tests/
-│   ├── test_health.py     # Testes básicos
-│   ├── test_webhook.py    # Testes de webhook
-│   ├── test_waha.py       # Testes do cliente WAHA
-│   └── test_ai_bot.py     # Testes do bot IA
+├── tests/                 # Testes (modo Python)
 ├── scripts/               # Automação PowerShell
 ├── .github/workflows/     # CI/CD GitHub Actions
 ├── compose.yml            # Docker Compose
