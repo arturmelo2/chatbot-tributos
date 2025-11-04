@@ -22,8 +22,11 @@ RUN apt-get update \
 
 # Copiar requirements e instalar dependências Python
 COPY requirements.txt .
+# Em build multi-arquitetura evitamos pacotes GPU (nvidia-*, triton) que não possuem wheels compatíveis
+# Gera um requirements filtrado para instalar apenas dependências CPU-friendly
 RUN python -m pip install --upgrade pip && \
-    pip install -r requirements.txt && \
+    grep -vE '^(nvidia-|triton==)' requirements.txt > requirements-docker.txt && \
+    pip install -r requirements-docker.txt && \
     apt-get purge -y --auto-remove gcc g++ && \
     rm -rf /var/lib/apt/lists/*
 
