@@ -59,37 +59,39 @@ WAHA_SESSION=default
 
 ---
 
-## 🐳 3. Subir a stack
+## 🐳 3. Subir a stack (modo rápido)
+
+Opção A — script automatizado (recomendado em Windows Server):
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\bootstrap-no-domain.ps1 -WaitSeconds 20 -AutoStart
+```
+
+Opção B — manual:
 
 ```bash
 docker compose -f compose.prod.yml up -d
 ```
 
-Aguarde 30-60s para os containers iniciarem.
+Aguarde 20-60s para os containers iniciarem.
 
 ---
 
 ## 🧪 4. Validar serviços
 
-### API Python
-```bash
-curl http://177.200.219.170:5000/health
-```
-Deve retornar: `{"status":"healthy","timestamp":"..."}`
+Se estiver no servidor Windows, teste localmente:
 
-### WAHA
-```bash
-curl http://177.200.219.170:3000/api/sessions
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\health-check-local.ps1
 ```
 
-### n8n
-Abra no navegador: **http://177.200.219.170:5679**
+Resultados esperados: ✓ API OK, ✓ WAHA OK, ✓ n8n OK
 
 ---
 
 ## 📱 5. Conectar WhatsApp
 
-1. Acesse: **http://177.200.219.170:3000**
+1. Acesse no servidor: **http://localhost:3000**
 2. Login:
    - User: `admin`
    - Pass: `Tributos@NovaTrento2025`
@@ -100,7 +102,7 @@ Abra no navegador: **http://177.200.219.170:5679**
 
 ## 🔄 6. Importar workflow n8n
 
-1. Acesse: **http://177.200.219.170:5679**
+1. Acesse no servidor: **http://localhost:5679**
 2. Crie conta (primeira vez)
 3. Clique em **Workflows** → **Import from File**
 4. Selecione: `n8n/workflows/chatbot_orquestracao_plus_menu.json`
