@@ -218,12 +218,21 @@ CHROMA_PATH=./chroma_data
 KNOWLEDGE_PATH=./rag/data
 ```
 
-## 📖 Guias Adicionais
 
-- [DEVELOPMENT.md](DEVELOPMENT.md) - Guia completo de desenvolvimento
-- [DOCKER_DESKTOP.md](DOCKER_DESKTOP.md) - Instalação do Docker
-- [CONFIGURAR_N8N.md](CONFIGURAR_N8N.md) - Integração n8n
-- [TROUBLESHOOTING_PORTA_3000.md](TROUBLESHOOTING_PORTA_3000.md) - Resolver conflitos de porta
+## 📖 Guias e Documentação
+
+Todos os arquivos de documentação e guias foram movidos para a pasta `docs/`:
+
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — Guia completo de desenvolvimento
+- [docs/DOCKER_DESKTOP.md](docs/DOCKER_DESKTOP.md) — Instalação do Docker
+- [docs/CONFIGURAR_N8N.md](docs/CONFIGURAR_N8N.md) — Integração n8n
+- [docs/TROUBLESHOOTING_PORTA_3000.md](docs/TROUBLESHOOTING_PORTA_3000.md) — Resolver conflitos de porta
+- [docs/STATUS.md](docs/STATUS.md) — Status do projeto
+- [docs/QUICK_START_DOCKER.md](docs/QUICK_START_DOCKER.md) — Guia rápido Docker
+- [docs/DOCS_TRIBUTOS.md](docs/DOCS_TRIBUTOS.md) — Documentação técnica
+- [docs/CREDENCIAIS_WAHA.md](docs/CREDENCIAIS_WAHA.md) — Credenciais WAHA
+- [docs/N8N_CHATBOT_COMPLETO.md](docs/N8N_CHATBOT_COMPLETO.md) — Guia n8n completo
+- [docs/N8N_WORKFLOW.md](docs/N8N_WORKFLOW.md) — Workflow n8n
 
 ## 🤝 Contribuindo
 
