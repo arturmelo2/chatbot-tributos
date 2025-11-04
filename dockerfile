@@ -27,8 +27,14 @@ COPY requirements.txt .
 # Gera um requirements filtrado para instalar apenas dependências CPU-friendly
 RUN --mount=type=cache,target=/root/.cache/pip \
     python -m pip install --upgrade pip && \
-    grep -vE '^(nvidia-|triton==)' requirements.txt > requirements-docker.txt && \
-    PIP_NO_CACHE_DIR=0 pip install -r requirements-docker.txt && \
+    # 1) Instalar Torch CPU primeiro para satisfazer dependências (evita baixar pacotes NVIDIA/cu*)
+    pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.6.0+cpu && \
+    # 2) Fixar torch CPU via constraints para impedir reinstalação pela resolução de deps
+    echo "torch==2.6.0+cpu" > constraints.txt && \
+    # 3) Remover entradas problemáticas e instalar o restante com extra-index do PyTorch CPU
+    grep -vE '^(nvidia-|triton==|torch==)' requirements.txt > requirements-docker.txt && \
+    PIP_NO_CACHE_DIR=1 pip install --extra-index-url https://download.pytorch.org/whl/cpu -c constraints.txt -r requirements-docker.txt && \
+    rm -f constraints.txt requirements-docker.txt && \
     apt-get purge -y --auto-remove gcc g++ && \
     rm -rf /var/lib/apt/lists/*
 
