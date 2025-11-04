@@ -1,8 +1,0 @@
-#! 0-whatsapp-ai-chatbot-namespace.yaml
-# Generated code, do not edit
-apiVersion: v1
-kind: Namespace
-metadata:
-    name: whatsapp-ai-chatbot
-    labels:
-        com.docker.compose.project: whatsapp-ai-chatbot
