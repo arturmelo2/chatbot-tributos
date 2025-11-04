@@ -3,9 +3,10 @@
   Instala uma Tarefa Agendada para manter o chatbot sempre rodando (Docker Compose).
 
 .DESCRIPTION
-  Cria a tarefa "TributosChatbot-AutoStart" que executa o script ./scripts/up.ps1
-  a cada inicialização do Windows, com atraso para aguardar o Docker Desktop iniciar.
-  A tarefa é executada com privilégios elevados sob a conta SYSTEM.
+  Cria a tarefa "TributosChatbot-AutoStart" que executa um script de subida dos
+  containers (up.ps1, up-prod.ps1 ou up-prod-https.ps1) a cada inicialização do
+  Windows, com atraso para aguardar o Docker iniciar. A tarefa é executada com
+  privilégios elevados sob a conta SYSTEM.
 
 .NOTES
   - Requer PowerShell 7+ (pwsh)
@@ -17,11 +18,15 @@
 
 .PARAMETER TaskName
   Nome da tarefa (padrão: TributosChatbot-AutoStart)
+
+.PARAMETER Mode
+  Qual stack subir no boot: dev | prod | prod-https (padrão: prod)
 #>
 [CmdletBinding(SupportsShouldProcess=$true)]
 param(
   [int]$DelaySeconds = 60,
-  [string]$TaskName = 'TributosChatbot-AutoStart'
+  [string]$TaskName = 'TributosChatbot-AutoStart',
+  [ValidateSet('dev','prod','prod-https')][string]$Mode = 'prod'
 )
 
 function Assert-Admin {
@@ -38,10 +43,19 @@ Assert-Admin
 # Resolve caminhos
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot  = Resolve-Path (Join-Path $scriptDir '..')
-$upScript  = Join-Path $repoRoot 'scripts' | Join-Path -ChildPath 'up.ps1'
+
+# Escolhe o script conforme o modo
+switch ($Mode) {
+  'dev'        { $upScriptName = 'up.ps1' }
+  'prod'       { $upScriptName = 'up-prod.ps1' }
+  'prod-https' { $upScriptName = 'up-prod-https.ps1' }
+  default      { $upScriptName = 'up-prod.ps1' }
+}
+
+$upScript  = Join-Path (Join-Path $repoRoot 'scripts') $upScriptName
 
 if (-not (Test-Path $upScript)) {
-  Write-Error "Não encontrei o script up.ps1 em: $upScript"
+  Write-Error "Não encontrei o script alvo ($upScriptName) em: $upScript"
   exit 1
 }
 
@@ -53,8 +67,8 @@ if (-not $pwsh) {
 }
 
 $sleepArg = if ($DelaySeconds -gt 0) { "Start-Sleep -Seconds $DelaySeconds; " } else { '' }
-$escapedUp = $upScript.Replace('`', '``').Replace('"', '\"')
-$command = "$sleepArg& `\"$escapedUp`\""
+# Monta o comando de forma simples e segura
+$command = "$sleepArg& \"$upScript\""
 
 $action = New-ScheduledTaskAction \
   -Execute $pwsh \
@@ -90,6 +104,7 @@ Register-ScheduledTask \
 # Definimos o atraso via Start-Sleep embutido no comando (-DelaySeconds)
 
 Write-Host "✅ Tarefa '$TaskName' instalada com sucesso."
+Write-Host "- Modo: $Mode"
 Write-Host "- Vai rodar no boot executando: $upScript"
 Write-Host "- WorkingDir: $repoRoot"
-Write-Host "Dica: Ajuste o delay usando o parâmetro -DelaySeconds (opcional); ou configure o Docker Desktop para iniciar com o Windows."
+Write-Host "Dica: Ajuste o delay com -DelaySeconds (opcional). Garanta que o Docker inicie com o Windows."
