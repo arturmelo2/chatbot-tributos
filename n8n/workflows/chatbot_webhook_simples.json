@@ -4,7 +4,7 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "waha-webhook",
+  "path": "8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b/waha",
         "responseMode": "lastNode",
         "options": {}
       },
