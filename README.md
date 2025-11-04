@@ -2,47 +2,36 @@
 
 [![CI](https://github.com/arturmelo2/whatsapp-ai-chatbot/actions/workflows/ci.yml/badge.svg)](https://github.com/arturmelo2/whatsapp-ai-chatbot/actions/workflows/ci.yml)
 
-Sistema de chatbot inteligente para atendimento automatizado sobre tributos municipais via WhatsApp, integrado com WAHA (WhatsApp HTTP API) e powered by RAG (Retrieval-Augmented Generation).
+Sistema de chatbot inteligente para atendimento automatizado sobre tributos municipais via WhatsApp.
+
+**Arquitetura:** WhatsApp → WAHA → n8n (orquestração) → API Python (RAG+LLM) → n8n → WAHA
 
 ## 🚀 Início Rápido (Docker)
-
-### Opção 1: Chatbot Completo em n8n (Recomendado)
 
 ```bash
 # 1. Configurar variáveis de ambiente
 cp .env.example .env
 # Editar .env com suas credenciais (GROQ_API_KEY ou OPENAI_API_KEY)
 
-# 2. Iniciar apenas WAHA e n8n
+# 2. Iniciar stack completa (WAHA + n8n + API)
 ./scripts/up-n8n.ps1
-
-# 3. Configurar n8n
-# - Acesse http://localhost:5679
-# - Crie conta
-# - Instale community nodes: @n8n/n8n-nodes-langchain, n8n-nodes-waha
-# - Importe workflow: n8n/workflows/chatbot_completo_n8n.json
-# - Configure credenciais Groq/OpenAI
-# - Ative o workflow
-
-# 4. Testar
-# Envie mensagem pelo WhatsApp conectado ao WAHA
-```
-
-### Opção 2: Com API Python (Avançado)
-
-```bash
-# 1. Configurar variáveis de ambiente
-cp .env.example .env
-# Editar .env com suas credenciais
-
-# 2. Iniciar todos os serviços
-./scripts/up.ps1
 
 # 3. Carregar base de conhecimento
 ./scripts/load-knowledge.ps1
 
-# 4. Testar
-curl http://localhost:5000/health
+# 4. Configurar n8n
+# - Acesse http://localhost:5679
+# - Crie conta
+# - Instale community node: n8n-nodes-waha
+# - Importe workflow: n8n/workflows/chatbot_completo_orquestracao.json
+# - Configure credencial WAHA (Header Auth)
+# - Ative o workflow
+
+# 5. Conectar WhatsApp
+./scripts/start-waha-session.ps1
+
+# 6. Testar
+# Envie mensagem pelo WhatsApp
 ```
 
 ## 📋 Requisitos
@@ -50,9 +39,22 @@ curl http://localhost:5000/health
 - **Docker Desktop** (com Docker Compose v2)
 - **PowerShell** (scripts de automação)
 - Chaves de API:
-  - **Modo n8n**: Groq ou OpenAI (para LLM)
-  - **Modo Python**: Groq/OpenAI/xAI (LLM provider)
-  - WAHA API (WhatsApp) - fixada no projeto
+  - Groq ou OpenAI (para LLM)
+  - WAHA (fixada no projeto)
+
+## 🎯 Arquitetura
+
+```
+┌─────────────┐     ┌──────┐     ┌─────────────┐     ┌──────────────┐
+│  WhatsApp   │────▶│ WAHA │────▶│     n8n     │────▶│  API Python  │
+│             │◀────│      │◀────│ (orquestra) │◀────│  (RAG+LLM)   │
+└─────────────┘     └──────┘     └─────────────┘     └──────────────┘
+```
+
+**Responsabilidades:**
+- **WAHA**: Conexão WhatsApp, enviar/receber mensagens
+- **n8n**: Orquestração visual, filtros, typing, erro handling, logging
+- **API Python**: RAG (LangChain + ChromaDB), LLM (Groq/OpenAI), Histórico
 
 ## 🎯 Funcionalidades
 
