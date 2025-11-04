@@ -51,7 +51,7 @@ services:
       start_period: 40s
 
   api:
-    image: arturmdmm/whatsapp-ai-chatbot:1.0.0
+    image: arturmdmm/whatsapp-ai-chatbot:latest
     container_name: tributos_api
     restart: unless-stopped
     ports:

@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7-labs
 # =============================================================================
 # Dockerfile - Chatbot de Tributos Nova Trento/SC
 # =============================================================================
@@ -24,9 +25,10 @@ RUN apt-get update \
 COPY requirements.txt .
 # Em build multi-arquitetura evitamos pacotes GPU (nvidia-*, triton) que não possuem wheels compatíveis
 # Gera um requirements filtrado para instalar apenas dependências CPU-friendly
-RUN python -m pip install --upgrade pip && \
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip install --upgrade pip && \
     grep -vE '^(nvidia-|triton==)' requirements.txt > requirements-docker.txt && \
-    pip install -r requirements-docker.txt && \
+    PIP_NO_CACHE_DIR=0 pip install -r requirements-docker.txt && \
     apt-get purge -y --auto-remove gcc g++ && \
     rm -rf /var/lib/apt/lists/*
 
