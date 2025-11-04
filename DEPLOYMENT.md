@@ -226,6 +226,23 @@ Gerar hash para Basic Auth (Windows PowerShell):
 
 Copie o hash gerado para as variáveis *_PASSWORD_HASH no `.env`.
 
+Modelo recomendado de .env para produção:
+
+```bash
+cp .env.production.example .env
+# edite o arquivo .env e preencha as chaves e domínio
+```
+
+Checar DNS antes de subir (opcional):
+
+```powershell
+./scripts/check-dns.ps1 -Domain $env:DOMAIN
+```
+
+```bash
+./scripts/check-dns.sh "$DOMAIN"
+```
+
 Validação rápida dos endpoints (opcional):
 
 ```powershell
