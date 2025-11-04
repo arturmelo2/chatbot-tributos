@@ -1,0 +1,141 @@
+{
+  "name": "🤖 Chatbot Orquestração — Plus + Menu Engine (Nova Trento)",
+  "active": false,
+  "nodes": [
+    {
+      "id": "1fcc1cbd-0e0a-4649-9d41-7effc5e9b84e",
+      "name": "WAHA Trigger",
+      "type": "n8n-nodes-waha.wahaTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "path": "8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b/waha"
+      }
+    },
+    {
+      "id": "7f153a67-1fd0-42ed-ad1c-3d6cfacedbbc",
+      "name": "Filtrar Grupos",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        300,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.payload.from}}",
+              "operation": "contains",
+              "value2": "@g.us"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "2a68b055-0764-422d-8199-f913b78d9f52",
+      "name": "Encerrar (Grupos)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        520,
+        -160
+      ],
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "ignored",
+              "value": "true"
+            },
+            {
+              "name": "reason",
+              "value": "Mensagem de grupo ignorada (@g.us)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "b5be535c-06d3-42d1-8e73-c1013e921503",
+      "name": "Extrair Metadados",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        520,
+        120
+      ],
+      "parameters": {
+        "keepOnlySet": false,
+        "values": {
+          "string": [
+            {
+              "name": "chat_id",
+              "value": "={{$json.payload.from}}"
+            },
+            {
+              "name": "message",
+              "value": "={{$json.payload.body}}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{$json.payload.timestamp || $now}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "1e48f1a2-480d-4405-946d-3a4305cb477b",
+      "name": "Throttle / Anti-spam",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        120
+      ],
+      "parameters": {
+        "language": "javascript",
+        "jsCode": "const maxPerMin = parseInt($env.THROTTLE_MAX_PER_MIN || '6', 10);\nconst windowSec = parseInt($env.THROTTLE_WINDOW_SEC || '60', 10);\nconst now = Date.now();\nconst sd = this.getWorkflowStaticData('global');\nsd.rate = sd.rate || {};\nreturn items.map(it => {\n  const chatId = it.json.chat_id || it.json.payload?.from;\n  if (!chatId) return it;\n  const arr = (sd.rate[chatId] || []).filter(ts => (now - ts) <= windowSec*1000);\n  arr.push(now);\n  sd.rate[chatId] = arr;\n  it.json.throttled = (arr.length > maxPerMin);\n  it.json.rateCount = arr.length;\n  return it;\n});"
+      }
+    },
+    {
+      "id": "d49a2b50-cd75-46ae-a9bd-89e89fd9a910",
+      "name": "Está Throttled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        120
+      ],
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.throttled === true}}",
+              "operation": "isTrue"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cb30a21a-28ca-4d43-badc-4ff3f3cee650",
+      "name": "Avisar Throttle",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1320,
+        -40
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": 

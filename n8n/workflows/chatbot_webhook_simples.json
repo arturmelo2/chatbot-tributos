@@ -1,5 +1,6 @@
 {
   "name": "Chatbot Tributos - Webhook Simples",
+  "active": false,
   "nodes": [
     {
       "parameters": {
@@ -23,7 +24,7 @@
         "conditions": {
           "string": [
             {
-              "value1": "={{ $json.body.payload?.from || $json.body.from }}",
+              "value1": "={{ $json.payload?.from || $json.from }}",
               "operation": "notContains",
               "value2": "@g.us"
             }
@@ -47,7 +48,7 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('Webhook').item.json.body.payload?.from || $('Webhook').item.json.body.from }}\"\n}",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('Webhook').item.json.payload?.from || $('Webhook').item.json.from }}\"\n}",
         "options": {}
       },
       "id": "start-typing",
@@ -66,7 +67,7 @@
         "url": "http://api:5000/chatbot/webhook/",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ $('Webhook').item.json.body }}",
+        "jsonBody": "={{ $('Webhook').item.json }}",
         "options": {
           "timeout": 60000
         }
@@ -88,7 +89,7 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('Webhook').item.json.body.payload?.from || $('Webhook').item.json.body.from }}\"\n}",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('Webhook').item.json.payload?.from || $('Webhook').item.json.from }}\"\n}",
         "options": {}
       },
       "id": "stop-typing",
@@ -103,7 +104,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Log da mensagem processada\nconst webhookData = $('Webhook').item.json.body;\nconst chatId = webhookData.payload?.from || webhookData.from;\nconst message = webhookData.payload?.body || webhookData.body;\n\nconsole.log('✅ Mensagem processada com sucesso');\nconsole.log('   Chat ID:', chatId);\nconsole.log('   Mensagem:', message);\n\nreturn {\n  json: {\n    status: 'success',\n    chatId: chatId,\n    processed: true\n  }\n};"
+        "jsCode": "// Log da mensagem processada\nconst webhookData = $('Webhook').item.json;\nconst chatId = webhookData.payload?.from || webhookData.from;\nconst message = webhookData.payload?.body || webhookData.body;\n\nconsole.log('✅ Mensagem processada com sucesso');\nconsole.log('   Chat ID:', chatId);\nconsole.log('   Mensagem:', message);\n\nreturn {\n  json: {\n    status: 'success',\n    chatId: chatId,\n    processed: true\n  }\n};"
       },
       "id": "log-success",
       "name": "Log Success",
