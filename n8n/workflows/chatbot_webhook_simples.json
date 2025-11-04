@@ -1,5 +1,5 @@
 {
-  "name": "Chatbot Tributos - Webhook Simples",
+  "name": "Chatbot Tributos - Webhook Simples v3",
   "active": false,
   "nodes": [
     {
@@ -67,7 +67,7 @@
         "url": "http://api:5000/chatbot/webhook/",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ $('Webhook').item.json }}",
+        "jsonBody": "={{ $('Webhook').item.json.body }}",
         "options": {
           "timeout": 60000
         }
