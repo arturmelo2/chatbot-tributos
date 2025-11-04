@@ -2,9 +2,10 @@
 # Docker Compose - Chatbot de Tributos Nova Trento/SC
 # =============================================================================
 #
-# MODOS DE OPERAÇÃO:
-# 1. n8n Completo (recomendado): docker compose up -d waha n8n
-# 2. Com API Python (avançado): docker compose up -d
+# ARQUITETURA:
+# WhatsApp → WAHA → n8n (orquestração) → API Python (RAG+LLM) → n8n → WAHA
+#
+# Todos os 3 containers são essenciais para o funcionamento completo
 #
 # =============================================================================
 
@@ -71,10 +72,10 @@ services:
       start_period: 40s
 
   # ---------------------------------------------------------------------------
-  # API - Chatbot Application (OPCIONAL - use apenas para casos avançados)
+  # API - Chatbot Application (Processamento RAG + LLM)
   # ---------------------------------------------------------------------------
-  # Para chatbot completo em n8n, não é necessário iniciar este container
-  # Inicie apenas se precisar de lógica Python customizada
+  # Responsável por: RAG (ChromaDB), LLM (Groq/OpenAI), Histórico de conversa
+  # Chamada pelo n8n para processar mensagens
   # ---------------------------------------------------------------------------
   api:
     build:

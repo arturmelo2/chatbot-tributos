@@ -1,0 +1,347 @@
+{
+  "name": "Chatbot Tributos - Fluxo Completo n8n",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b/waha",
+        "options": {}
+      },
+      "id": "waha-trigger",
+      "name": "WAHA Trigger",
+      "type": "n8n-nodes-waha.wahaTrigger",
+      "typeVersion": 1,
+      "position": [250, 400],
+      "notes": "Recebe mensagens do WhatsApp via WAHA"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.payload.from }}",
+              "operation": "contains",
+              "value2": "@g.us"
+            }
+          ]
+        }
+      },
+      "id": "filter-groups",
+      "name": "Filtrar Grupos",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 400],
+      "notes": "Ignora mensagens de grupos"
+    },
+    {
+      "parameters": {},
+      "id": "stop-group",
+      "name": "Ignorar (Grupo)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [650, 250],
+      "notes": "Fim do fluxo para grupos"
+    },
+    {
+      "parameters": {
+        "url": "http://waha:3000/api/startTyping",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "headerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $json.payload.from }}\"\n}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "start-typing",
+      "name": "Iniciar Digitando",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [650, 500],
+      "notes": "Mostra indicador 'digitando...' no WhatsApp",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "http://api:5000/chatbot/webhook/",
+        "authentication": "none",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "process-api",
+      "name": "Processar na API Python",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 500],
+      "notes": "Envia para API Python (RAG + LLM + Histórico)\nTimeout 60s para processamento completo"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $statusCode }}",
+              "operation": "equal",
+              "value2": 200
+            }
+          ]
+        }
+      },
+      "id": "check-response",
+      "name": "Verificar Resposta",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1050, 500],
+      "notes": "Verifica se API respondeu com sucesso"
+    },
+    {
+      "parameters": {
+        "url": "http://waha:3000/api/stopTyping",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "headerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('WAHA Trigger').first().json.payload.from }}\"\n}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "stop-typing-success",
+      "name": "Parar Digitando (Sucesso)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1250, 400],
+      "notes": "Para indicador de digitação",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "http://waha:3000/api/stopTyping",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "headerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('WAHA Trigger').first().json.payload.from }}\"\n}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "stop-typing-error",
+      "name": "Parar Digitando (Erro)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1250, 600],
+      "notes": "Para indicador mesmo em caso de erro",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "http://waha:3000/api/sendText",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "headerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('WAHA Trigger').first().json.payload.from }}\",\n  \"text\": \"Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente ou entre em contato com a Secretaria de Finanças pelo telefone (47) 3267-8000.\"\n}",
+        "options": {}
+      },
+      "id": "send-error",
+      "name": "Enviar Mensagem de Erro",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1450, 600],
+      "notes": "Informa usuário sobre erro"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log de sucesso\nconst chatId = $('WAHA Trigger').first().json.payload.from;\nconst message = $('WAHA Trigger').first().json.payload.body;\n\nconsole.log(`✅ Mensagem processada com sucesso`);\nconsole.log(`   Chat: ${chatId}`);\nconsole.log(`   Mensagem: ${message.substring(0, 50)}...`);\n\nreturn $input.all();"
+      },
+      "id": "log-success",
+      "name": "Log Sucesso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 400],
+      "notes": "Registra sucesso no console do n8n"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log de erro\nconst chatId = $('WAHA Trigger').first().json.payload.from;\nconst message = $('WAHA Trigger').first().json.payload.body;\nconst error = $input.first().json;\n\nconsole.error(`❌ Erro ao processar mensagem`);\nconsole.error(`   Chat: ${chatId}`);\nconsole.error(`   Mensagem: ${message.substring(0, 50)}...`);\nconsole.error(`   Erro:`, error);\n\nreturn $input.all();"
+      },
+      "id": "log-error",
+      "name": "Log Erro",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 700],
+      "notes": "Registra erro no console do n8n"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat_id",
+              "name": "chat_id",
+              "value": "={{ $json.payload.from }}",
+              "type": "string"
+            },
+            {
+              "id": "message",
+              "name": "message",
+              "value": "={{ $json.payload.body }}",
+              "type": "string"
+            },
+            {
+              "id": "timestamp",
+              "name": "timestamp",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "extract-metadata",
+      "name": "Extrair Metadados",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [650, 350],
+      "notes": "Extrai dados da mensagem para logging"
+    }
+  ],
+  "connections": {
+    "WAHA Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Grupos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extrair Metadados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Grupos": {
+      "main": [
+        [
+          {
+            "node": "Ignorar (Grupo)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Iniciar Digitando",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Iniciar Digitando": {
+      "main": [
+        [
+          {
+            "node": "Processar na API Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar na API Python": {
+      "main": [
+        [
+          {
+            "node": "Verificar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Parar Digitando (Sucesso)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Parar Digitando (Erro)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parar Digitando (Sucesso)": {
+      "main": [
+        [
+          {
+            "node": "Log Sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parar Digitando (Erro)": {
+      "main": [
+        [
+          {
+            "node": "Enviar Mensagem de Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Mensagem de Erro": {
+      "main": [
+        [
+          {
+            "node": "Log Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-11-04T00:00:00.000Z",
+      "updatedAt": "2025-11-04T00:00:00.000Z",
+      "id": "chatbot",
+      "name": "chatbot"
+    },
+    {
+      "createdAt": "2025-11-04T00:00:00.000Z",
+      "updatedAt": "2025-11-04T00:00:00.000Z",
+      "id": "production",
+      "name": "production"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-11-04T00:00:00.000Z",
+  "versionId": "1"
+}
