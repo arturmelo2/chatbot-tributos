@@ -212,7 +212,7 @@ docker compose -f compose.prod.yml -f compose.prod.caddy.yml up -d
 Rotas expostas no domínio:
 - https://$DOMAIN/api → serviço API (porta 5000)
 - https://$DOMAIN/waha → WAHA (porta 3000)
-- https://$DOMAIN/n8n → n8n (porta 5679)
+- https://$DOMAIN/n8n → n8n (porta 5678 via proxy)
 
 Requisitos:
 - Portas 80 e 443 abertas no firewall e no provedor de nuvem
@@ -225,6 +225,16 @@ Gerar hash para Basic Auth (Windows PowerShell):
 ```
 
 Copie o hash gerado para as variáveis *_PASSWORD_HASH no `.env`.
+
+Validação rápida dos endpoints (opcional):
+
+```powershell
+./scripts/health-check.ps1 -Domain $env:DOMAIN
+```
+
+```bash
+./scripts/health-check.sh "$DOMAIN"
+```
 
 
 ### 4. Configuração do n8n
