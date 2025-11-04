@@ -1,0 +1,95 @@
+# =============================================================================
+# .dockerignore - Arquivos excluídos do build Docker
+# =============================================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Ambiente virtual
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+dockerfile
+compose.yml
+.dockerignore
+
+# Logs
+logs/
+*.log
+
+# Base vetorial local (será criada no container)
+chroma_data/
+
+# Exportações
+exports/
+
+# Environment (será montado como volume ou passado via env_file)
+.env
+.env.*
+
+# Documentação de desenvolvimento
+README.md
+DOCS_TRIBUTOS.md
+DOCKER.md
+
+# Kubernetes (não necessário no container)
+bridge/
+
+# Testes
+tests/
+test_*.py
+*_test.py
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Outros
+*.md
+LICENSE
+.DS_Store
+Thumbs.db
+
+# n8n/WAHA volumes (mantidos fora da imagem)
+n8n_data/
+waha_data/
+
+# Jupyter e caches locais
+**/*.ipynb_checkpoints/
+**/.cache/

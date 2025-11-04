@@ -1,0 +1,60 @@
+#! waha-deployment.yaml
+# Generated code, do not edit
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: waha
+    namespace: whatsapp-ai-chatbot
+    labels:
+        com.docker.compose.project: whatsapp-ai-chatbot
+        com.docker.compose.service: waha
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            com.docker.compose.project: whatsapp-ai-chatbot
+            com.docker.compose.service: waha
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                com.docker.compose.project: whatsapp-ai-chatbot
+                com.docker.compose.service: waha
+                com.docker.compose.network.tributos_network: "true"
+        spec:
+            restartPolicy: unless-stopped
+            containers:
+                - name: tributos-waha
+                  image: devlikeapro/waha:latest
+                  imagePullPolicy: IfNotPresent
+                  env:
+                    - name: HOST
+                      value: "0.0.0.0"
+                    - name: WAHA_API_KEY
+                      value: "tributos_nova_trento_2025_api_key_fixed"
+                    - name: WAHA_DASHBOARD_PASSWORD
+                      value: "Tributos@NovaTrento2025"
+                    - name: WAHA_DASHBOARD_USERNAME
+                      value: "admin"
+                    - name: WHATSAPP_HOOK_EVENTS
+                      value: "message,session.status"
+                    - name: WHATSAPP_HOOK_URL
+                      value: "http://n8n:5678/webhook/8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b/waha"
+                  livenessProbe:
+                    exec:
+                        command: ['wget --quiet --tries=1 --spider http://localhost:3000']
+                    periodSeconds: 30
+                    initialDelaySeconds: 40
+                    timeoutSeconds: 10
+                    failureThreshold: 3
+                  ports:
+                    - name: waha-3000
+                      containerPort: 3000
+                  volumeMounts:
+                    - name: app--waha
+                      mountPath: /app/.waha
+            volumes:
+                - name: app--waha
+                  persistentVolumeClaim:
+                    claimName: waha-waha-data

@@ -1,0 +1,28 @@
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+select = ["E","F","I","B","UP","N","SIM"]
+ignore = ["E501"]
+
+[tool.ruff.isort]
+known-first-party = ["bot", "services", "rag", "tools"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_unused_ignores = true
+warn_return_any = true
+ignore_missing_imports = true
+allow_redefinition = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-q"
+python_files = ["test_*.py", "*_test.py"]
+pythonpath = ["."]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

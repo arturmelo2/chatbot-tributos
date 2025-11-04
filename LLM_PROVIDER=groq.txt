@@ -1,0 +1,8 @@
+DEPRECATED: Do not use this file. Use .env for configuration.
+
+# Example (.env)
+# LLM_PROVIDER=groq
+# LLM_MODEL=llama-3.3-70b-versatile
+# GROQ_API_KEY=your_key_here
+
+Supported providers: openai, xai (grok), groq.

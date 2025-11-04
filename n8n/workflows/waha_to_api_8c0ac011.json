@@ -1,0 +1,49 @@
+{
+  "name": "WAHA → API (mensagens) [8c0ac011]",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-waha.wahaTrigger",
+      "typeVersion": 202411,
+      "position": [280, 300],
+      "id": "ed600a13-e176-4b43-9d03-78c01ef38b98",
+      "name": "WAHA Trigger",
+      "webhookId": "8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            { "value1": "={{ $json.event }}", "operation": "equal", "value2": "message" }
+          ]
+        }
+      },
+      "id": "if-only-messages",
+      "name": "Só mensagens?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [540, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://api:5000/chatbot/webhook/",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "b2c3d4e5-6789-01bc-def0-234567890abc",
+      "name": "Enviar para API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [820, 240]
+    }
+  ],
+  "connections": {
+    "WAHA Trigger": { "main": [[{ "node": "Só mensagens?", "type": "main", "index": 0 }]] },
+    "Só mensagens?": { "main": [[{ "node": "Enviar para API", "type": "main", "index": 0 }], []] }
+  },
+  "pinData": {},
+  "meta": { "templateCredsSetupCompleted": true }
+}

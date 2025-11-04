@@ -1,0 +1,58 @@
+#! n8n-deployment.yaml
+# Generated code, do not edit
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: n8n
+    namespace: whatsapp-ai-chatbot
+    labels:
+        com.docker.compose.project: whatsapp-ai-chatbot
+        com.docker.compose.service: n8n
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            com.docker.compose.project: whatsapp-ai-chatbot
+            com.docker.compose.service: n8n
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                com.docker.compose.project: whatsapp-ai-chatbot
+                com.docker.compose.service: n8n
+                com.docker.compose.network.tributos_network: "true"
+        spec:
+            restartPolicy: unless-stopped
+            containers:
+                - name: tributos-n8n
+                  image: n8nio/n8n:latest
+                  imagePullPolicy: IfNotPresent
+                  env:
+                    - name: GENERIC_TIMEZONE
+                      value: "America/Sao_Paulo"
+                    - name: N8N_HOST
+                      value: "0.0.0.0"
+                    - name: N8N_PORT
+                      value: "5678"
+                    - name: N8N_PROTOCOL
+                      value: "http"
+                    - name: WEBHOOK_URL
+                      value: "http://n8n:5678/"
+                  livenessProbe:
+                    exec:
+                        command: ['wget --quiet --tries=1 --spider http://localhost:5678/healthz']
+                    periodSeconds: 30
+                    initialDelaySeconds: 40
+                    timeoutSeconds: 10
+                    failureThreshold: 3
+                  ports:
+                    - name: n8n-5678
+                      containerPort: 5678
+                  volumeMounts:
+                    - name: home-node--n8n
+                      mountPath: /home/node/.n8n
+            volumes:
+                - name: home-node--n8n
+                  persistentVolumeClaim:
+                    claimName: n8n-n8n-data

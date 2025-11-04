@@ -1,0 +1,5 @@
+{
+  "_deprecated": true,
+  "note": "Este workflow usava Webhook genérico e foi descontinuado. Use o WAHA Trigger.",
+  "replacement": "n8n/workflows/waha_to_api_8c0ac011.json"
+}

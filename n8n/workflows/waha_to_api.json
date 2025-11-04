@@ -1,0 +1,5 @@
+{
+  "_deprecated": true,
+  "note": "Use o workflow canônico com webhookId atualizado.",
+  "replacement": "n8n/workflows/waha_to_api_8c0ac011.json"
+}

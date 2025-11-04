@@ -1,0 +1,16 @@
+#! kustomization.yaml
+# Generated code, do not edit
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+    - ../../base
+patches:
+    - path: api-C:\Users\artur\chatbot-tributos\whatsapp-ai-chatbot\exports-persistentVolumeClaim.yaml
+    - path: api-C:\Users\artur\chatbot-tributos\whatsapp-ai-chatbot\logs-persistentVolumeClaim.yaml
+    - path: api-C:\Users\artur\chatbot-tributos\whatsapp-ai-chatbot\rag\data-persistentVolumeClaim.yaml
+    - path: api-chroma_data-persistentVolumeClaim.yaml
+    - path: api-service.yaml
+    - path: n8n-n8n_data-persistentVolumeClaim.yaml
+    - path: n8n-service.yaml
+    - path: waha-service.yaml
+    - path: waha-waha_data-persistentVolumeClaim.yaml

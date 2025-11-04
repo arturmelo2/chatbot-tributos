@@ -1,0 +1,52 @@
+# Configuração do Prometheus para Chatbot de Tributos
+
+global:
+  scrape_interval: 15s      # Intervalo entre coletas
+  evaluation_interval: 15s  # Intervalo de avaliação de regras
+  external_labels:
+    monitor: 'chatbot-tributos'
+    environment: 'production'
+
+# Alertmanager configuration (opcional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - alertmanager:9093
+
+# Regras de alertas (opcional)
+# rule_files:
+#   - "alerts/*.yml"
+
+# Configuração de scraping
+scrape_configs:
+  # Job 1: Chatbot API (Flask)
+  - job_name: 'chatbot-api'
+    static_configs:
+      - targets: ['api:5000']
+        labels:
+          service: 'chatbot'
+          component: 'api'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # Job 2: Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+          component: 'monitoring'
+
+  # Job 3: WAHA (se expuser métricas no futuro)
+  # - job_name: 'waha'
+  #   static_configs:
+  #     - targets: ['waha:3000']
+  #   metrics_path: '/metrics'
+
+  # Job 4: N8N (se expuser métricas no futuro)
+  # - job_name: 'n8n'
+  #   static_configs:
+  #     - targets: ['n8n:5678']
+  #   metrics_path: '/metrics'

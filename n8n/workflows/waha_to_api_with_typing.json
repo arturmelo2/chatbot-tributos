@@ -1,0 +1,9 @@
+{
+  "name": "WAHA → API (mensagens) — DEPRECATED (usar waha_to_api.json)",
+  "deprecated": true,
+  "note": "Este workflow com typing via n8n foi descontinuado. Use o arquivo n8n/workflows/waha_to_api.json. As respostas e o typing são gerenciados pelo app.py.",
+  "nodes": [],
+  "connections": {},
+  "pinData": {},
+  "meta": { "templateCredsSetupCompleted": true }
+}

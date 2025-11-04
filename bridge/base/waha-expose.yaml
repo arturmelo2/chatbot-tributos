@@ -1,0 +1,18 @@
+#! waha-expose.yaml
+# Generated code, do not edit
+apiVersion: v1
+kind: Service
+metadata:
+    name: waha
+    namespace: whatsapp-ai-chatbot
+    labels:
+        com.docker.compose.project: whatsapp-ai-chatbot
+        com.docker.compose.service: waha
+spec:
+    selector:
+        com.docker.compose.project: whatsapp-ai-chatbot
+        com.docker.compose.service: waha
+    ports:
+        - name: waha-3000
+          port: 3000
+          targetPort: waha-3000

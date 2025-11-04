@@ -1,0 +1,93 @@
+#! api-deployment.yaml
+# Generated code, do not edit
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: api
+    namespace: whatsapp-ai-chatbot
+    labels:
+        com.docker.compose.project: whatsapp-ai-chatbot
+        com.docker.compose.service: api
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            com.docker.compose.project: whatsapp-ai-chatbot
+            com.docker.compose.service: api
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                com.docker.compose.project: whatsapp-ai-chatbot
+                com.docker.compose.service: api
+                com.docker.compose.network.tributos_network: "true"
+        spec:
+            restartPolicy: unless-stopped
+            containers:
+                - name: tributos-api
+                  image: whatsapp-ai-chatbot-api
+                  imagePullPolicy: IfNotPresent
+                  env:
+                    - name: CHROMA_DIR
+                      value: "/app/chroma_data"
+                    - name: DEBUG
+                      value: "false"
+                    - name: EMBEDDING_MODEL
+                      value: "sentence-transformers/all-MiniLM-L6-v2"
+                    - name: ENVIRONMENT
+                      value: "production"
+                    - name: FLOW_JSON_PATH
+                      value: "fluxo_novatrento.json"
+                    - name: GROQ_API_KEY
+                      value: "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"
+                    - name: LLM_MODEL
+                      value: "grok-4-fast-reasoning"
+                    - name: LLM_PROVIDER
+                      value: "xai"
+                    - name: PORT
+                      value: "5000"
+                    - name: WAHA_API_KEY
+                      value: "tributos_nova_trento_2025_api_key_fixed"
+                    - name: WAHA_API_URL
+                      value: "http://waha:3000"
+                    - name: WAHA_SESSION
+                      value: "default"
+                    - name: WAHA_TIMEOUT
+                      value: "10"
+                    - name: XAI_API_KEY
+                      value: "xai-4AakwOfqTM06pXMIs4zNVQJObBbv1P684ZfmZTPh0NvNQFlRSHdXbcIdb6cXt4Ejb2VLdHfOR3QJcat8"
+                  livenessProbe:
+                    exec:
+                        command: ['python -c import requests; requests.get(''http://localhost:5000/health''', timeout=5)]
+                    periodSeconds: 30
+                    initialDelaySeconds: 40
+                    timeoutSeconds: 10
+                    failureThreshold: 3
+                  ports:
+                    - name: api-5000
+                      containerPort: 5000
+                  volumeMounts:
+                    - name: app-chroma-data
+                      mountPath: /app/chroma_data
+                    - name: app-logs
+                      mountPath: /app/logs
+                    - name: app-rag-data
+                      mountPath: /app/rag/data
+                      readOnly: true
+                    - name: app-exports
+                      mountPath: /app/exports
+            volumes:
+                - name: app-chroma-data
+                  persistentVolumeClaim:
+                    claimName: api-chroma-data
+                - name: app-logs
+                  hostPath:
+                    path: C:\Users\artur\chatbot-tributos\whatsapp-ai-chatbot\logs
+                - name: app-rag-data
+                  hostPath:
+                    path: C:\Users\artur\chatbot-tributos\whatsapp-ai-chatbot\rag\data
+                  readOnly: true
+                - name: app-exports
+                  hostPath:
+                    path: C:\Users\artur\chatbot-tributos\whatsapp-ai-chatbot\exports

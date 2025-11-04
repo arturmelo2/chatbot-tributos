@@ -1,0 +1,182 @@
+# =============================================================================
+# Docker Compose - Chatbot de Tributos Nova Trento/SC
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # WAHA - WhatsApp HTTP API
+  # ---------------------------------------------------------------------------
+  waha:
+    image: devlikeapro/waha:latest
+    container_name: tributos_waha
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      - WHATSAPP_HOOK_URL=http://n8n:5678/webhook/8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b/waha
+      - WHATSAPP_HOOK_EVENTS=message,session.status
+      - HOST=0.0.0.0
+      # Credenciais FIXAS - não mudam entre restarts
+      - WAHA_API_KEY=tributos_nova_trento_2025_api_key_fixed
+      - WAHA_DASHBOARD_USERNAME=admin
+      - WAHA_DASHBOARD_PASSWORD=Tributos@NovaTrento2025
+    volumes:
+      - waha_data:/app/.waha
+    networks:
+      - tributos_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ---------------------------------------------------------------------------
+  # n8n - Workflow Automation (Webhook Intermediário)
+  # ---------------------------------------------------------------------------
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: tributos_n8n
+    restart: unless-stopped
+    ports:
+      - '5679:5678'
+    environment:
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://n8n:5678/
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - tributos_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5678/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ---------------------------------------------------------------------------
+  # API - Chatbot Application
+  # ---------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: tributos_api
+    restart: unless-stopped
+    ports:
+      - '5000:5000'
+    volumes:
+      # Volume para base vetorial (persistente)
+      - chroma_data:/app/chroma_data
+      # Volume para logs (opcional)
+      - ./logs:/app/logs
+      # Volume para documentos RAG (read-only em produção)
+      - ./rag/data:/app/rag/data:ro
+      # Exportações (histórico/conversas)
+      - ./exports:/app/exports
+    env_file:
+      - .env
+    environment:
+      # Sobrescrever valores do .env se necessário
+      - CHROMA_DIR=/app/chroma_data
+      - WAHA_API_URL=http://waha:3000
+      - WAHA_API_KEY=tributos_nova_trento_2025_api_key_fixed
+      - PORT=5000
+      - ENVIRONMENT=production
+    depends_on:
+      waha:
+        condition: service_started
+    networks:
+      - tributos_network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ---------------------------------------------------------------------------
+  # Prometheus - Coleta de Métricas
+  # ---------------------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: tributos_prometheus
+    restart: unless-stopped
+    ports:
+      - '9090:9090'
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - tributos_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # Grafana - Visualização de Métricas
+  # ---------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    container_name: tributos_grafana
+    restart: unless-stopped
+    ports:
+      - '3001:3000'
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-Tributos@2025}
+      - GF_SERVER_ROOT_URL=http://localhost:3001
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - tributos_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+# -----------------------------------------------------------------------------
+# Volumes Persistentes
+# -----------------------------------------------------------------------------
+volumes:
+  # Base vetorial do Chroma (conhecimento do chatbot)
+  chroma_data:
+    driver: local
+  # Dados do WAHA (sessões WhatsApp)
+  waha_data:
+    driver: local
+  # Workflows do n8n
+  n8n_data:
+    driver: local
+  # Dados do Prometheus (métricas históricas)
+  prometheus_data:
+    driver: local
+  # Dados do Grafana (dashboards, usuários, configurações)
+  grafana_data:
+    driver: local
+
+# -----------------------------------------------------------------------------
+# Rede Interna
+# -----------------------------------------------------------------------------
+networks:
+  tributos_network:
+    driver: bridge
