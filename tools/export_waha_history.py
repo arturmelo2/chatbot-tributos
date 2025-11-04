@@ -40,7 +40,9 @@ def export_history(
     total_chats = 0
     total_msgs = 0
 
-    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    out_dir = os.path.dirname(out_path)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
 
     with open(out_path, "w", encoding="utf-8") as f:
         for c in chats or []:
@@ -142,3 +144,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
