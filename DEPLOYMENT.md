@@ -189,6 +189,12 @@ Para expor com HTTPS válido (Let’s Encrypt) e proxy reverso por caminho:
 ```env
 DOMAIN=chatbot.seudominio.com
 LETSENCRYPT_EMAIL=seu-email@dominio.com
+# Basic Auth (opcional)
+# Para gerar o hash: ./scripts/gen-caddy-passhash.ps1 -Plaintext "sua-senha"
+N8N_USER=admin
+N8N_PASSWORD_HASH=$2a$14$coloque_aqui_o_hash_gerado
+WAHA_USER=admin
+WAHA_PASSWORD_HASH=$2a$14$coloque_aqui_o_hash_gerado
 ```
 
 3. Suba a stack com o proxy Caddy:
@@ -211,6 +217,14 @@ Rotas expostas no domínio:
 Requisitos:
 - Portas 80 e 443 abertas no firewall e no provedor de nuvem
 - DNS propagado corretamente para o IP do servidor
+
+Gerar hash para Basic Auth (Windows PowerShell):
+
+```powershell
+./scripts/gen-caddy-passhash.ps1 -Plaintext "MinhaSenhaForte123!"
+```
+
+Copie o hash gerado para as variáveis *_PASSWORD_HASH no `.env`.
 
 
 ### 4. Configuração do n8n

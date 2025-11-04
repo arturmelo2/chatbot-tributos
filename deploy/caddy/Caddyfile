@@ -9,15 +9,31 @@
         reverse_proxy api:5000
     }
 
-    @waha path /waha* {
-    }
+    @waha path /waha*
     handle @waha {
+        # Protege o dashboard do WAHA com Basic Auth (opcional)
+        @needAuth {
+            not {
+                header Authorization *
+            }
+        }
+        basicauth @needAuth {
+            {$WAHA_USER} {$WAHA_PASSWORD_HASH}
+        }
         reverse_proxy waha:3000
     }
 
-    @n8n path /n8n* {
-    }
+    @n8n path /n8n*
     handle @n8n {
+        # Protege o n8n com Basic Auth (opcional)
+        @needAuthN8N {
+            not {
+                header Authorization *
+            }
+        }
+        basicauth @needAuthN8N {
+            {$N8N_USER} {$N8N_PASSWORD_HASH}
+        }
         reverse_proxy n8n:5679
     }
 
