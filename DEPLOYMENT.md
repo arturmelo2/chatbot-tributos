@@ -179,6 +179,40 @@ docker-compose logs -f
 
 Observação: quando usar `compose.prod.yml`, você não precisa rodar build no servidor.
 
+### HTTPS automático com Caddy (opcional e recomendado)
+
+Para expor com HTTPS válido (Let’s Encrypt) e proxy reverso por caminho:
+
+1. Crie um A/AAAA record apontando seu domínio para o IP do servidor (ex.: chatbot.seudominio.com)
+2. Defina no arquivo `.env` as variáveis:
+
+```env
+DOMAIN=chatbot.seudominio.com
+LETSENCRYPT_EMAIL=seu-email@dominio.com
+```
+
+3. Suba a stack com o proxy Caddy:
+
+```powershell
+./scripts/up-prod-https.ps1
+```
+
+Ou manualmente via Docker Compose:
+
+```bash
+docker compose -f compose.prod.yml -f compose.prod.caddy.yml up -d
+```
+
+Rotas expostas no domínio:
+- https://$DOMAIN/api → serviço API (porta 5000)
+- https://$DOMAIN/waha → WAHA (porta 3000)
+- https://$DOMAIN/n8n → n8n (porta 5679)
+
+Requisitos:
+- Portas 80 e 443 abertas no firewall e no provedor de nuvem
+- DNS propagado corretamente para o IP do servidor
+
+
 ### 4. Configuração do n8n
 
 ```bash

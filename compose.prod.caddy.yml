@@ -9,6 +9,12 @@ services:
     environment:
       - DOMAIN=${DOMAIN}
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - N8N_USER=${N8N_USER:-}
+      - N8N_PASSWORD_HASH=${N8N_PASSWORD_HASH:-}
+      - WAHA_USER=${WAHA_USER:-}
+      - WAHA_PASSWORD_HASH=${WAHA_PASSWORD_HASH:-}
+    env_file:
+      - .env
     volumes:
       - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
