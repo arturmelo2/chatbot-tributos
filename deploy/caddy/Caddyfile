@@ -4,6 +4,11 @@
 
 {$DOMAIN} {
     encode zstd gzip
+    # Página estática no root
+    handle_path / {
+        root * /srv
+        file_server browse false
+    }
     @api path /api* /health
     handle @api {
         reverse_proxy api:5000
@@ -37,9 +42,10 @@
         reverse_proxy n8n:5679
     }
 
-    # fallback 404 to avoid exposing anything else
+    # fallback: se nada casar, serve estático (index.html)
     handle {
-        respond 404
+        root * /srv
+        file_server browse false
     }
 }
 
