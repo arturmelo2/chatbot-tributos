@@ -50,26 +50,16 @@ Guia prático para uso do Portal do Cidadão Betha, ferramenta on-line para serv
 
 ### 2.2. Emitir certidões
 
-**Certidão Negativa de Débitos (CND)**:
+**Certidões (CND/CPEN/Imobiliária/Econômica)**:
 
-**Por CPF/CNPJ**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbyHHcDK1V21w==
+- Acesse o Portal do Cidadão Web: https://e-gov.betha.com.br/cdweb/03114-502/
+- Navegue até o menu de Certidões (os nomes podem variar conforme a versão)
+- Informe CPF/CNPJ, Inscrição Imobiliária ou Inscrição Econômica, conforme o caso
+- Se não houver débitos impeditivos: emita a certidão em PDF (validade usual de 90 dias)
+- Se algum link direto não funcionar, consulte a Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
 
-**Por Inscrição Econômica**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZv1PWSEd5LZQ==
-
-**Por Inscrição Imobiliária**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbLWCo87X0P1Q==
-
-**Passo a passo**:
-1. Acessar link correspondente
-2. Informar número da inscrição ou CPF/CNPJ
-3. Sistema verifica débitos
-4. Se não houver débitos: Emite CND em PDF
-5. Validade: 90 dias
-
-**Certidão Venal (IPTU)**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbBrVm4EIEgNA==
+**Certidão de Valor Venal (IPTU)**:
+- Disponível via Portal do Cidadão Web (menu de Certidões / Imóveis). Caso não localize, utilize a Carta de Serviços.
 
 ---
 
@@ -77,8 +67,8 @@ https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbBrVm4EIEgNA==
 
 ### 3.1. Emitir 2ª via do carnê
 
-**Link direto**:
-https://e-gov.betha.com.br/cdweb/03114-502/contribuinte/rel_guiaiptu.faces
+**Acesso**:
+Portal do Cidadão Web: https://e-gov.betha.com.br/cdweb/03114-502/ (o caminho interno pode mudar)
 
 **Opções**:
 - Emitir carnê completo (todas as parcelas)
@@ -116,7 +106,7 @@ https://e-gov.betha.com.br/cdweb/03114-502/contribuinte/rel_guiaiptu.faces
 
 ### 4.1. Portal NFS-e
 
-**Link**: https://e-gov.betha.com.br/nfse/03114-502/
+**Link**: https://e-gov.betha.com.br/nfse/03114-502/ (endereço vigente em nov/2025; pode ser atualizado)
 
 **Funcionalidades**:
 - Emitir NFS-e
@@ -127,7 +117,7 @@ https://e-gov.betha.com.br/cdweb/03114-502/contribuinte/rel_guiaiptu.faces
 
 ### 4.2. Declaração Mensal de Serviços (DMS)
 
-**Link**: https://e-gov.betha.com.br/dms/03114-502/
+**Link**: https://e-gov.betha.com.br/dms/03114-502/ (endereço vigente em nov/2025; pode ser atualizado)
 
 **Quando declarar**: Até dia 10 de cada mês
 
@@ -148,8 +138,8 @@ https://e-gov.betha.com.br/cdweb/03114-502/contribuinte/rel_guiaiptu.faces
 
 ### 5.1. Emitir guia de ITBI
 
-**Link**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZT5aW4KbNY7A==
+**Acesso**:
+Portal do Cidadão Web (menu ITBI). Caso o link direto tenha mudado, siga pela Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
 
 **Passo a passo**:
 1. Acessar link
@@ -179,8 +169,8 @@ https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZT5aW4KbNY7A==
 
 ### 6.1. Abrir protocolo on-line
 
-**Link**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+**Acesso**:
+Portal do Cidadão Web > Protocolo > Novo Protocolo (o endereço pode mudar conforme versão; use a Carta de Serviços se necessário)
 
 **Tipos de protocolo**:
 - Parcelamento de débitos
@@ -254,8 +244,8 @@ https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7fCNxNE3Jehpg==
 
 ### 8.1. Validar certidão
 
-**Link**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=liyWcyOMEeNvFkekCbDSzA==
+**Acesso**:
+Portal do Cidadão Web > Validação de Documentos (ou Certidões). Se não localizar a opção, consulte a Carta de Serviços.
 
 **Como validar**:
 1. Acessar link
@@ -277,16 +267,16 @@ https://novatrento.sc.gov.br/legislacao/
 ### Principais links salvos
 
 **IPTU**:
-- 2ª via: https://e-gov.betha.com.br/cdweb/03114-502/contribuinte/rel_guiaiptu.faces
+- 2ª via: Portal do Cidadão Web > Contribuinte > 2ª via do IPTU (o caminho pode mudar)
 
 **Certidões**:
-- CND por CPF: https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbyHHcDK1V21w==
+- Acesse via Portal do Cidadão Web (menu Certidões) ou pela Carta de Serviços.
 
 **NFS-e**:
 - Emitir: https://e-gov.betha.com.br/nfse/03114-502/
 
 **Protocolo**:
-- Novo: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+- Novo: Portal do Cidadão Web > Protocolo > Novo Protocolo
 
 ### Navegadores recomendados
 

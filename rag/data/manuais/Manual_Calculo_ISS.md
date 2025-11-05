@@ -141,26 +141,28 @@ ISS = 250 × 5% = R$ 12,50
 
 ## Base de Cálculo Especial
 
-### Dedução de materiais (casos específicos)
+### Dedução de materiais (quando expressamente prevista em lei)
 
-Em Nova Trento, **regra geral: não deduz materiais**.
+Em Nova Trento, a **regra geral é não deduzir materiais** do preço do serviço. 
+Somente há dedução quando isso estiver **expressamente previsto na legislação municipal vigente** (LC 33/2003 e alterações ou normas específicas). 
+Na ausência de previsão legal, a base de cálculo permanece o preço total do serviço.
 
-**Exceções** (conforme LC 33/2003):
-- Serviços de próteses dentárias: Deduz material
-- Serviços de molduras e congêneres: Deduz material
-
-### Deduções de subempreitadas
+### Deduções de subempreitadas (se previstas em lei)
 
 **Exemplo**: Construtora subcontrata pedreiro
 
 - Obra total: R$ 200.000,00
 - Subempreitada paga: R$ 50.000,00 (com NFS-e)
 
+Se a **dedução de subempreitadas** estiver prevista na legislação municipal e for **devidamente comprovada** (por exemplo, com NFS-e do subcontratado), o tomador principal pode recolher o ISS apenas sobre o valor que lhe corresponde, e o subempreiteiro recolhe sobre a sua parcela.
+
+Exemplo ilustrativo:
+
 **Construtora**:
 - Base de cálculo: R$ 150.000,00 (200k - 50k)
 - ISS: R$ 150.000 × 2% = R$ 3.000,00
 
-**Subempreiteiro** (pedreiro):
+**Subempreiteiro**:
 - Base de cálculo: R$ 50.000,00
 - ISS: R$ 50.000 × 2% = R$ 1.000,00
 
@@ -209,7 +211,7 @@ Empresas formadas por profissionais de mesma categoria (médicos, advogados, con
 ## Verificação e Consulta
 
 **Consultar alíquota de serviço**:
-Portal NFS-e: https://e-gov.betha.com.br/nfse/03114-502/
+Portal NFS-e: https://e-gov.betha.com.br/nfse/03114-502/ (endereço vigente em nov/2025; pode ser atualizado. Em caso de mudança, consulte a Carta de Serviços.)
 
 **Emitir NFS-e**:
 Sistema calcula ISS automaticamente ao selecionar código do serviço.
