@@ -15,8 +15,9 @@ $api  = Test-Endpoint "http://localhost:5000/health"
 $waha = Test-Endpoint "http://localhost:3000"
 $n8n  = Test-Endpoint "http://localhost:5679"
 
-if ($api)  { Write-Host "✓ API OK   → http://localhost:5000/health" -ForegroundColor Green } else { Write-Host "✗ API OFF  → http://localhost:5000/health" -ForegroundColor Red }
-if ($waha) { Write-Host "✓ WAHA OK  → http://localhost:3000" -ForegroundColor Green } else { Write-Host "✗ WAHA OFF → http://localhost:3000" -ForegroundColor Red }
-if ($n8n)  { Write-Host "✓ n8n OK   → http://localhost:5679" -ForegroundColor Green } else { Write-Host "✗ n8n OFF  → http://localhost:5679" -ForegroundColor Red }
+# Avoid special Unicode characters that can break in some terminals/codepages
+if ($api)  { Write-Host "[OK]  API  -> http://localhost:5000/health" -ForegroundColor Green } else { Write-Host "[OFF] API  -> http://localhost:5000/health" -ForegroundColor Red }
+if ($waha) { Write-Host "[OK]  WAHA -> http://localhost:3000" -ForegroundColor Green } else { Write-Host "[OFF] WAHA -> http://localhost:3000" -ForegroundColor Red }
+if ($n8n)  { Write-Host "[OK]  n8n  -> http://localhost:5679" -ForegroundColor Green } else { Write-Host "[OFF] n8n  -> http://localhost:5679" -ForegroundColor Red }
 
 if ($api) { exit 0 } else { exit 1 }
