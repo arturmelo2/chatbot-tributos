@@ -23,5 +23,13 @@ if (-not $env:CHROMA_DIR) { $env:CHROMA_DIR = (Join-Path $root "chroma_data") }
 # Garante diretório do Chroma
 if (-not (Test-Path $env:CHROMA_DIR)) { New-Item -ItemType Directory -Force -Path $env:CHROMA_DIR | Out-Null }
 
+# Inicia transcript para capturar logs em arquivo
+$logsDir = Join-Path $root "logs"
+if (-not (Test-Path $logsDir)) { New-Item -ItemType Directory -Force -Path $logsDir | Out-Null }
+$logPath = Join-Path $logsDir "api-native.log"
+try { Start-Transcript -Path $logPath -Append -ErrorAction SilentlyContinue | Out-Null } catch {}
+
 Write-Host "[run] Iniciando waitress em 0.0.0.0:$($env:PORT)"
 & $pythonExe -m waitress --host=0.0.0.0 --port $env:PORT app:app
+
+try { Stop-Transcript | Out-Null } catch {}
