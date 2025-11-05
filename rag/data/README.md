@@ -18,7 +18,7 @@ data/
 
 **Essenciais**:
 - LC 661/2017 - Código Tributário Municipal de Nova Trento
-- LC 705/2023 - Alterações no Código Tributário
+- LC 705/2023 - Estatuto dos Servidores (não altera tributos municipais)
 - Lei Complementar Federal 116/2003 - Lista de Serviços ISS
 - CTN - Código Tributário Nacional (artigos relevantes)
 - Lei Federal 13.709/2018 - LGPD (seções sobre atendimento)
@@ -131,45 +131,52 @@ O script mostrará:
    ✅ 247 chunk(s) criado(s)
 ```
 
-## 📝 Boas Práticas
+## 📝 Informações Importantes
 
-### Nomeação de Arquivos
+### Legislação de Nova Trento
 
-✅ **Bom**:
-- `LC_661_2017_Codigo_Tributario.pdf`
-- `FAQ_Certidoes_Negativas.md`
-- `Manual_Calculo_ISS_2024.pdf`
+**Base Legal Atual**:
+- **LC 661/2017** - Código Tributário Municipal (base do IPTU, ISS, ITBI)
+- **LC 33/2003** - Lista de Serviços Municipal (ISS)
+- **Decretos anuais** - Definem prazos, descontos e valores (exemplo: 2025 teve 25% desconto cota única IPTU)
 
-❌ **Ruim**:
-- `documento.pdf`
-- `novo.txt`
-- `arquivo final v2 (1).pdf`
+**ATENÇÃO**: LC 705/2023 é sobre servidores públicos, **NÃO** altera tributos!
 
-### Organização de Conteúdo
+### Links do Portal Betha (válidos em 2025)
 
-**Para FAQs e Manuais**:
-1. Use títulos claros e objetivos
-2. Inclua links oficiais sempre que possível
-3. Especifique "Quem pode usar" e "Documentos necessários"
-4. Atualize datas e valores regularmente
+**Portal Cidadão Web**: `https://e-gov.betha.com.br/cdweb/03114-502/`
+**NFS-e**: `https://e-gov.betha.com.br/nfse/03114-502/`
+**DMS**: `https://e-gov.betha.com.br/dms/03114-502/`
 
-**Para Leis**:
-1. Use a versão consolidada mais recente
-2. Indique a data de atualização no nome do arquivo
-3. Se houver alterações, mantenha ambas as versões (original + alterada)
+⚠️ **Estes links podem mudar!** Sempre consulte a [Carta de Serviços](https://novatrento.sc.gov.br/cartaservicos/)
 
-### Atualização Periódica
+### Alíquotas e Valores Reais
+
+**IPTU**:
+- Alíquotas: 0,5% a 3% (varia por tipo e valor venal)
+- Desconto 2025: 25% cota única, 15% parcelamento (8x)
+
+**ISS**:
+- Alíquotas: 2% a 5% (conforme serviço)
+- Construção civil: 2%
+- Serviços profissionais: 5%
+
+**ITBI**:
+- Alíquota: 2%
+- Base: maior valor entre transação e valor venal
+
+### Atualização da Base
 
 **Quando atualizar**:
-- Publicação de nova legislação
-- Alteração de prazos ou valores
+- Nova legislação municipal
+- Decreto anual do IPTU (março)
 - Mudanças nos links do Portal Betha
-- Feedback dos atendentes sobre informações desatualizadas
+- Feedback dos atendentes
 
 **Como atualizar**:
-1. Substitua o arquivo antigo pelo novo (mesmo nome)
-2. Execute: `python rag/load_knowledge.py --clear`
-3. Teste o chatbot com perguntas sobre o conteúdo atualizado
+1. Editar arquivo correspondente
+2. Executar: `docker compose exec api python rag/load_knowledge.py --clear --chunk-size 1200 --chunk-overlap 300`
+3. Testar chatbot com perguntas específicas
 
 ## 🔍 Verificando o Conteúdo da Base
 
@@ -215,5 +222,7 @@ Dúvidas sobre como adicionar documentos? Entre em contato com o Setor de TI.
 
 ---
 
-**Última atualização**: 31/10/2025
-**Responsável**: Setor de Tributos + TI
+**Última atualização**: 05/11/2025
+**Responsável**: Setor de Tributos + TI - Prefeitura Municipal de Nova Trento/SC
+**Legislação base**: LC 661/2017, LC 33/2003, Decretos municipais
+**Portal**: Betha Cloud (links válidos em nov/2025)

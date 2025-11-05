@@ -2,7 +2,7 @@
 
 ## Introdução
 
-Este manual apresenta o passo a passo para calcular o IPTU (Imposto Predial e Territorial Urbano) em Nova Trento/SC, conforme LC 661/2017 e alterações posteriores.
+Este manual apresenta o passo a passo para calcular o IPTU (Imposto Predial e Territorial Urbano) em Nova Trento/SC, com base na LC 661/2017 (Código Tributário Municipal) e nos decretos anuais de lançamento do IPTU. Observação: a LC 705/2023 trata do estatuto dos servidores e não altera o IPTU.
 
 ---
 
@@ -19,7 +19,8 @@ Todo imóvel situado na **zona urbana** do município está sujeito ao IPTU. Im�
 ### Base legal
 
 - Lei Complementar 661/2017 - Código Tributário Municipal
-- LC 705/2023 - Atualizações de valores e alíquotas
+- Decretos de lançamento anuais do IPTU (calendário, descontos e eventuais ajustes do exercício)
+- CTN (Lei 5.172/1966) – normas gerais tributárias
 
 ---
 
@@ -103,7 +104,7 @@ Valor da Construção = Área Construída (m²) × Valor do m² (por padrão) ×
 
 ### 4.1. Imóvel Predial (com construção)
 
-**Alíquotas progressivas** (conforme LC 705/2023):
+**Alíquotas e faixas** (conforme LC 661/2017; valores e faixas podem variar por lei/decreto do exercício):
 
 | Valor Venal | Alíquota |
 |-------------|----------|
@@ -112,6 +113,8 @@ Valor da Construção = Área Construída (m²) × Valor do m² (por padrão) ×
 | De R$ 200.000,01 a R$ 350.000,00 | 1,0% |
 | De R$ 350.000,01 a R$ 500.000,00 | 1,2% |
 | Acima de R$ 500.000,00 | 1,5% |
+
+Nota: a tabela acima é ilustrativa com base em faixas usuais. Consulte o carnê e a legislação vigente para a alíquota aplicada ao seu imóvel no exercício corrente.
 
 **Cálculo progressivo**: Aplica-se a alíquota correspondente à faixa de valor.
 
@@ -136,27 +139,24 @@ Valor da Construção = Área Construída (m²) × Valor do m² (por padrão) ×
 
 ## 5. Descontos e Formas de Pagamento
 
-### 5.1. Cota Única com Desconto
+Os percentuais de desconto, número de parcelas e prazos são definidos anualmente por decreto de lançamento do IPTU. Em 2025, por exemplo, o município concedeu 25% de desconto para pagamento em cota única e 15% de desconto para pagamento parcelado em até 8 parcelas, com vencimentos a partir de março. Esses percentuais podem mudar a cada exercício.
 
-**Desconto**: 10% para pagamento em cota única
+### 5.1. Cota única (exemplo ilustrativo – decreto 2025)
 
-**Vencimento**: Último dia útil de março
-
-**Exemplo**:
 - IPTU anual: R$ 2.721,00
-- Cota única: R$ 2.721,00 × 0,90 = **R$ 2.448,90**
+- Desconto: 25%
+- Valor a pagar: 2.721 × 0,75 = **R$ 2.040,75**
 
-### 5.2. Parcelamento em 10 vezes
+### 5.2. Parcelamento (exemplo ilustrativo – decreto 2025)
 
-**Sem desconto**
+- Parcelas: até 8
+- Desconto: 15% sobre o total anual
+- Valor com desconto: 2.721 × 0,85 = **R$ 2.312,85**
+- Valor de cada parcela: **R$ 289,11**
 
-**Vencimento**: Último dia útil de cada mês (abril a janeiro)
-
-**Valor mínimo da parcela**: R$ 50,00
-
-**Exemplo**:
-- IPTU anual: R$ 2.721,00
-- 10 parcelas: **R$ 272,10/mês**
+Observações:
+- O valor mínimo por parcela e as datas de vencimento são definidos no decreto de cada ano.
+- Alguns exercícios podem não conceder desconto no parcelamento.
 
 ---
 
@@ -231,7 +231,7 @@ Quando há construção em andamento:
 ### Consulta on-line
 
 **Portal**:
-https://e-gov.betha.com.br/cdweb/03114-502/contribuinte/rel_guiaiptu.faces
+https://e-gov.betha.com.br/cdweb/03114-502/ (o caminho interno pode mudar; se o link específico não abrir, consulte a Carta de Serviços da Prefeitura)
 
 **O que consultar**:
 - Valor venal do imóvel
@@ -250,9 +250,9 @@ Se discordar do valor venal ou IPTU calculado:
 
 ## 9. Referências Legais
 
-- **LC 661/2017**: Código Tributário Municipal
-- **LC 705/2023**: Atualização de valores e alíquotas
-- **CTN (Lei 5.172/1966)**: Código Tributário Nacional
+- **LC 661/2017** – Código Tributário Municipal
+- **Decretos de lançamento do IPTU** – publicados anualmente (calendário e descontos)
+- **CTN (Lei 5.172/1966)** – Código Tributário Nacional
 
 ---
 
