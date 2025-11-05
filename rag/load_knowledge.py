@@ -16,12 +16,14 @@ Estrutura esperada:
 
 import glob
 import os
+import re
 import sys
 from typing import Iterator, List, Optional, cast
 
 # Adiciona o diretório raiz ao path para importar módulos
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from bs4 import BeautifulSoup
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_core.documents import Document
@@ -29,6 +31,104 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from services.config import get_settings
+
+
+def parse_html_law(file_path: str) -> Document:
+    """
+    Parse HTML law file and extract clean text with rich metadata.
+    
+    Args:
+        file_path: Path to HTML file
+        
+    Returns:
+        Document with clean text and metadata
+    """
+    with open(file_path, "r", encoding="utf-8") as f:
+        html_content = f.read()
+    
+    soup = BeautifulSoup(html_content, "html.parser")
+    
+    # Extract metadata from table
+    metadata = {
+        "source": os.path.basename(file_path),
+        "type": "law",
+        "path": os.path.relpath(file_path, "rag/data"),
+    }
+    
+    # Parse metadata table
+    table = soup.find("table")
+    if table:
+        for row in table.find_all("tr"):
+            th = row.find("th")
+            td = row.find("td")
+            if th and td:
+                key = th.get_text(strip=True).lower()
+                value = td.get_text(strip=True)
+                
+                # Map Portuguese keys to English
+                key_map = {
+                    "tipo": "law_type",
+                    "número": "number",
+                    "ano": "year",
+                    "data": "date",
+                    "assunto": "subject",
+                    "tags": "tags",
+                    "situação": "status",
+                    "fonte oficial": "url",
+                }
+                
+                mapped_key = key_map.get(key, key)
+                if mapped_key in ["tags"]:
+                    metadata[mapped_key] = [tag.strip() for tag in value.split(";")]
+                else:
+                    metadata[mapped_key] = value
+    
+    # Extract title/ementa
+    title_elem = soup.find("h1")
+    title = title_elem.get_text(strip=True) if title_elem else ""
+    
+    ementa_section = soup.find("h2", string=re.compile(r"Ementa", re.I))
+    ementa = ""
+    if ementa_section and ementa_section.find_next_sibling("p"):
+        ementa = ementa_section.find_next_sibling("p").get_text(strip=True)
+    
+    # Build clean text content
+    content_parts = []
+    
+    if title:
+        content_parts.append(f"# {title}\n")
+    
+    if ementa:
+        content_parts.append(f"**Ementa**: {ementa}\n")
+    
+    # Add metadata summary
+    if metadata.get("law_type"):
+        content_parts.append(f"**Tipo**: {metadata.get('law_type')}")
+    if metadata.get("year"):
+        content_parts.append(f"**Ano**: {metadata.get('year')}")
+    if metadata.get("status"):
+        content_parts.append(f"**Situação**: {metadata.get('status')}")
+    if metadata.get("subject"):
+        content_parts.append(f"**Assunto**: {metadata.get('subject')}")
+    if metadata.get("tags") and isinstance(metadata.get("tags"), list):
+        content_parts.append(f"**Tags**: {', '.join(metadata.get('tags', []))}")
+    
+    # Extract main content (skip navigation and footer)
+    for container in soup.find_all("div", class_="container"):
+        # Skip metadata table sections
+        if container.find("table"):
+            continue
+        # Skip relations section (can be verbose)
+        if container.find("h3", string=re.compile(r"Relações", re.I)):
+            continue
+        
+        text = container.get_text(separator="\n", strip=True)
+        if text:
+            content_parts.append(text)
+    
+    clean_text = "\n\n".join(content_parts)
+    
+    return Document(page_content=clean_text, metadata=metadata)
 
 
 def iter_docs(data_path: str = "rag/data") -> Iterator[Document]:
@@ -54,7 +154,7 @@ def iter_docs(data_path: str = "rag/data") -> Iterator[Document]:
         print("   └── procedimentos/")
         return
 
-    patterns = ["**/*.pdf", "**/*.txt", "**/*.md"]
+    patterns = ["**/*.pdf", "**/*.txt", "**/*.md", "**/*.html"]
     files_found = []
 
     for pattern in patterns:
@@ -82,6 +182,22 @@ def iter_docs(data_path: str = "rag/data") -> Iterator[Document]:
                     doc.metadata["path"] = relative_path
                     yield doc
 
+            elif fp.lower().endswith(".html"):
+                # Parse HTML law files with BeautifulSoup
+                doc = parse_html_law(fp)
+                
+                # Add category based on folder
+                if "faqs" in relative_path.lower():
+                    doc.metadata["category"] = "FAQ"
+                elif "leis" in relative_path.lower():
+                    doc.metadata["category"] = "Lei"
+                elif "manuais" in relative_path.lower():
+                    doc.metadata["category"] = "Manual"
+                elif "procedimentos" in relative_path.lower():
+                    doc.metadata["category"] = "Procedimento"
+                
+                yield doc
+
             elif fp.lower().endswith((".md", ".txt")):
                 # Usa TextLoader para Markdown e TXT
                 loader = TextLoader(fp, encoding="utf-8")
@@ -90,6 +206,21 @@ def iter_docs(data_path: str = "rag/data") -> Iterator[Document]:
                     doc.metadata["source"] = file_name
                     doc.metadata["type"] = "markdown" if fp.endswith(".md") else "text"
                     doc.metadata["path"] = relative_path
+                    
+                    # Add category based on folder
+                    if "faqs" in relative_path.lower():
+                        doc.metadata["category"] = "FAQ"
+                        # Extract topic from filename (e.g., FAQ_IPTU.md -> IPTU)
+                        topic_match = re.search(r"FAQ[_-](.+)\.(md|txt)", file_name, re.I)
+                        if topic_match:
+                            doc.metadata["topic"] = topic_match.group(1).replace("_", " ")
+                    elif "leis" in relative_path.lower():
+                        doc.metadata["category"] = "Lei"
+                    elif "manuais" in relative_path.lower():
+                        doc.metadata["category"] = "Manual"
+                    elif "procedimentos" in relative_path.lower():
+                        doc.metadata["category"] = "Procedimento"
+                    
                     yield doc
 
         except Exception as e:
@@ -97,7 +228,7 @@ def iter_docs(data_path: str = "rag/data") -> Iterator[Document]:
 
 
 def split_documents(
-    docs: List[Document], chunk_size: int = 1000, chunk_overlap: int = 200
+    docs: List[Document], chunk_size: int = 1200, chunk_overlap: int = 300
 ) -> List[Document]:
     """
     Divide documentos grandes em chunks menores para melhor recuperação.
@@ -110,11 +241,24 @@ def split_documents(
     Returns:
         Lista de documentos divididos
     """
+    # Custom separators for legal documents
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
         length_function=len,
-        separators=["\n\n", "\n", ". ", " ", ""],
+        separators=[
+            "\n\n\n",  # Multiple newlines
+            "\n\n",    # Paragraph breaks
+            "\nArt. ", # Article breaks in laws
+            "\n§ ",    # Paragraph breaks in laws
+            "\nI - ",  # Item breaks in laws
+            "\n## ",   # H2 headers in markdown
+            "\n### ",  # H3 headers in markdown
+            "\n",      # Single newline
+            ". ",      # Sentence breaks
+            " ",       # Word breaks
+            "",        # Character breaks
+        ],
     )
 
     return cast(List[Document], text_splitter.split_documents(docs))
@@ -124,8 +268,8 @@ def load_knowledge(
     data_path: str = "rag/data",
     chroma_dir: Optional[str] = None,
     embedding_model: Optional[str] = None,
-    chunk_size: int = 1000,
-    chunk_overlap: int = 200,
+    chunk_size: int = 1200,
+    chunk_overlap: int = 300,
     clear_existing: bool = False,
 ):
     """
@@ -245,11 +389,11 @@ def main():
     parser.add_argument(
         "--chunk-size",
         type=int,
-        default=1000,
-        help="Tamanho dos chunks em caracteres (padrão: 1000)",
+        default=1200,
+        help="Tamanho dos chunks em caracteres (padrão: 1200)",
     )
     parser.add_argument(
-        "--chunk-overlap", type=int, default=200, help="Sobreposição entre chunks (padrão: 200)"
+        "--chunk-overlap", type=int, default=300, help="Sobreposição entre chunks (padrão: 300)"
     )
     parser.add_argument(
         "--clear", action="store_true", help="Limpa a base existente antes de carregar"
