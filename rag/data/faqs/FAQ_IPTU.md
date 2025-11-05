@@ -2,8 +2,8 @@
 
 ## 1. Como emitir guia de IPTU?
 
-**Link de emissão**:
-https://e-gov.betha.com.br/cdweb/03114-502/contribuinte/rel_guiaiptu.faces
+**Acesso**:
+Portal do Cidadão Web: https://e-gov.betha.com.br/cdweb/03114-502/ > Contribuinte > 2ª via do IPTU (o caminho pode mudar). Se não localizar, utilize a Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
 
 **O que é possível**:
 - Emitir 2ª via de carnê completo
@@ -84,8 +84,8 @@ IPTU = Valor Venal × Alíquota
 ### Como solicitar isenção
 
 1. Protocolo on-line:
-   https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
-   Assunto: "Pedido de Isenção de IPTU"
+   Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar)
+   Assunto: "Pedido de Isenção de IPTU". Se não localizar, consulte a Carta de Serviços.
 
 2. Documentos necessários:
    - Requerimento preenchido
@@ -102,8 +102,8 @@ IPTU = Valor Venal × Alíquota
 ## 5. Alteração de dados cadastrais do imóvel
 
 **Como solicitar**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
-Assunto: "Atualização cadastral – IPTU"
+Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar)
+Assunto: "Atualização cadastral – IPTU". Se não localizar, use a Carta de Serviços.
 
 **Alterações comuns**:
 - Mudança de proprietário (após compra/venda)
@@ -150,7 +150,7 @@ Assunto: "Atualização cadastral – IPTU"
 **Competência**: Setor de Engenharia/Urbanismo
 
 **Como solicitar**:
-Protocolo on-line: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+Protocolo on-line: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar). Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
 Assunto: "Regularização Fundiária - REURB"
 
 **Carta de Serviços**:
@@ -169,7 +169,7 @@ https://novatrento.sc.gov.br/cartaservicos/detalhe-abertura-e-consulta-de-proces
 **Competência**: Setor de Engenharia/Urbanismo (aprovação) + Setor de Tributos (atualização cadastral)
 
 **Protocolo on-line**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar). Se não localizar, consulte a Carta de Serviços.
 
 **Impacto no IPTU**:
 - **Desmembramento**: Gera novas inscrições imobiliárias, cada uma com IPTU próprio
@@ -203,7 +203,7 @@ Após escritura registrada, o novo proprietário deve solicitar atualização ca
 - Classificação errada do imóvel
 
 **Como impugnar**:
-1. Protocolo on-line: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+1. Protocolo on-line: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar)
    Assunto: "Impugnação de Lançamento de IPTU"
 
 2. Documentos:
@@ -221,4 +221,4 @@ Após escritura registrada, o novo proprietário deve solicitar atualização ca
 
 **Horário de atendimento**: Segunda a Sexta, 07h00 às 13h00
 **Contato**: Setor de Tributos - Prefeitura Municipal de Nova Trento/SC
-**Protocolo on-line**: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+**Protocolo on-line**: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar). Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/

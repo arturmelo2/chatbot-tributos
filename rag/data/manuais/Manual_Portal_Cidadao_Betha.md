@@ -208,8 +208,8 @@ Portal do Cidadão Web > Protocolo > Novo Protocolo (o endereço pode mudar conf
 
 ### 7.1. Alterar dados pessoais/empresariais
 
-**Link**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7fCNxNE3Jehpg==
+**Acesso**:
+Portal do Cidadão Web > Atualização Cadastral (pessoa física/jurídica). O caminho pode mudar conforme a versão; se não localizar, utilize a Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
 
 **Dados que podem ser alterados**:
 - Endereço

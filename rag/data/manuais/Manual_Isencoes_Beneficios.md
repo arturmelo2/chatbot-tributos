@@ -21,8 +21,9 @@ Guia completo sobre isenções e benefícios fiscais disponíveis no município 
 - Residir no imóvel
 
 **Como solicitar**:
-1. Protocolo on-line: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+1. Protocolo on-line no Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar)
 2. Assunto: "Pedido de Isenção de IPTU - Aposentado/Pensionista"
+3. Se não localizar a opção, utilize a Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
 
 **Documentos**:
 - Requerimento preenchido
@@ -324,4 +325,4 @@ Programas temporários de parcelamento com condições especiais (anistia de mul
 
 **Atualizado em**: Novembro/2025
 **Setor de Tributos - Prefeitura Municipal de Nova Trento/SC**
-**Protocolo on-line**: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+**Protocolo on-line**: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar). Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/

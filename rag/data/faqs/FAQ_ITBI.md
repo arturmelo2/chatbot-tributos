@@ -51,8 +51,8 @@ ITBI = Valor Venal × Alíquota
 
 ## 3. Como emitir a guia de ITBI?
 
-**Portal de emissão**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZT5aW4KbNY7A==
+**Acesso**:
+Portal do Cidadão Web: https://e-gov.betha.com.br/cdweb/03114-502/ > menu ITBI (o caminho pode mudar). Se o link direto não abrir, use a Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
 
 **Informações necessárias**:
 - CPF/CNPJ do comprador e vendedor
@@ -99,8 +99,7 @@ https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZT5aW4KbNY7A==
 - Ou incluído no financiamento (depende do banco)
 
 **Certidão de ITBI**:
-Após pagamento, solicitar:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZT5aW4KbNY7A==
+Após pagamento, solicitar via Portal do Cidadão Web (menu ITBI/Certidões). Caso não localize, consulte a Carta de Serviços.
 
 **Validade da certidão**: 30 dias.
 
@@ -120,8 +119,8 @@ https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZT5aW4KbNY7A==
 - Renda familiar até 5 salários mínimos
 
 **Como solicitar**:
-Protocolo on-line: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
-Assunto: "Pedido de Isenção de ITBI - Primeira Habitação SFH"
+Protocolo on-line: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar)
+Assunto: "Pedido de Isenção de ITBI - Primeira Habitação SFH". Se não localizar, consulte a Carta de Serviços.
 
 **Documentos necessários**:
 - Requerimento preenchido
@@ -192,8 +191,8 @@ Assunto: "Pedido de Isenção de ITBI - Primeira Habitação SFH"
 - Dados das partes (comprador/vendedor)
 
 **Como solicitar**:
-Protocolo on-line: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
-Assunto: "Retificação de Guia de ITBI"
+Protocolo on-line: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar)
+Assunto: "Retificação de Guia de ITBI". Se não localizar, consulte a Carta de Serviços.
 
 **Documentos**:
 - Guia de ITBI original (paga ou não)
@@ -218,8 +217,8 @@ Assunto: "Retificação de Guia de ITBI"
 - Isenção reconhecida posteriormente
 
 **Como solicitar**:
-Protocolo on-line: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
-Assunto: "Restituição de ITBI"
+Protocolo on-line: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar)
+Assunto: "Restituição de ITBI". Se não localizar, consulte a Carta de Serviços.
 
 **Documentos necessários**:
 - Requerimento fundamentado
@@ -242,5 +241,5 @@ Assunto: "Restituição de ITBI"
 
 **Horário de atendimento**: Segunda a Sexta, 07h00 às 13h00
 **Contato**: Setor de Tributos - Prefeitura Municipal de Nova Trento/SC
-**Portal ITBI**: https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZT5aW4KbNY7A==
-**Protocolo on-line**: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+**Portal do Cidadão Web**: https://e-gov.betha.com.br/cdweb/03114-502/ (menu ITBI; o caminho pode mudar)
+**Protocolo on-line**: Portal do Cidadão Web > Protocolo > Novo Protocolo. Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/

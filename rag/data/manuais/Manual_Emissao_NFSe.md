@@ -84,10 +84,10 @@ Guia completo passo a passo para emissão de Nota Fiscal de Serviços Eletrônic
 - Informar valor **bruto** (sem descontos)
 - Exemplo: R$ 2.500,00
 
-**4. Deduções** (se aplicável):
-- Material (apenas se permitido para o serviço)
-- Subempreitada (com NFS-e)
-- Deixar zero se não houver
+**4. Deduções** (somente se previstas em lei municipal e comprovadas):
+- Materiais: via de regra, não há dedução de materiais em Nova Trento. Apenas utilize se houver **previsão expressa na legislação municipal vigente** para o serviço e **comprovação idônea**.
+- Subempreitada: somente se a **dedução estiver prevista em lei** e houver **NFS-e válida** do subcontratado.
+- Se não houver base legal específica, deixe os campos de dedução em zero.
 
 ### 2.5. Retenções
 

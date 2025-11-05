@@ -258,4 +258,4 @@ Se discordar do valor venal ou IPTU calculado:
 
 **Atualizado em**: Novembro/2025
 **Setor de Tributos - Prefeitura Municipal de Nova Trento/SC**
-**Protocolo on-line**: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+**Protocolo on-line**: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar). Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/

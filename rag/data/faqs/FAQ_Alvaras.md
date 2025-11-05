@@ -5,8 +5,8 @@
 **O que é**: Autorização municipal para funcionamento de estabelecimento comercial, industrial ou prestador de serviços.
 
 **Portal de solicitação**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
-Assunto: "Alvará de Localização e Funcionamento"
+Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar)
+Assunto: "Alvará de Localização e Funcionamento". Se não localizar, use a Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
 
 **Documentos necessários**:
 - Requerimento preenchido
@@ -44,8 +44,8 @@ Assunto: "Alvará de Localização e Funcionamento"
 
 **Onde solicitar**:
 Vigilância Sanitária Municipal
-Protocolo: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
-Assunto: "Licença Sanitária"
+Protocolo: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar)
+Assunto: "Licença Sanitária". Se não localizar, use a Carta de Serviços.
 
 **Documentos**:
 - Requerimento
@@ -76,8 +76,8 @@ Assunto: "Licença Sanitária"
 - **Impacto regional/estadual**: Licença estadual (FATMA/IMA)
 
 **Como solicitar licença municipal**:
-Protocolo: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
-Assunto: "Licença Ambiental Municipal"
+Protocolo: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar)
+Assunto: "Licença Ambiental Municipal". Se não localizar, use a Carta de Serviços.
 
 **Documentos**:
 - Requerimento
@@ -122,8 +122,8 @@ Assunto: "Licença Ambiental Municipal"
 **Prazo**: Renovar **até 31 de março** de cada ano (mesmo mês do IPTU).
 
 **Como renovar**:
-Portal: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
-Assunto: "Renovação de Alvará de Localização"
+Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar)
+Assunto: "Renovação de Alvará de Localização". Se não localizar, use a Carta de Serviços.
 
 **Documentos**:
 - Requerimento de renovação
@@ -194,8 +194,8 @@ https://e-gov.betha.com.br/cdweb/03114-502/contribuinte/
 - Alteração de CNPJ
 
 **Como solicitar**:
-Protocolo: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
-Assunto: "Baixa de Alvará - Encerramento de Atividades"
+Protocolo: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar)
+Assunto: "Baixa de Alvará - Encerramento de Atividades". Se não localizar, use a Carta de Serviços.
 
 **Documentos**:
 - Requerimento de baixa
@@ -297,5 +297,5 @@ Para essas atividades, solicitar "Alvará Domiciliar" (isento de taxa em alguns 
 
 **Horário de atendimento**: Segunda a Sexta, 07h00 às 13h00
 **Contato**: Setor de Tributos - Prefeitura Municipal de Nova Trento/SC
-**Protocolo on-line**: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+**Protocolo on-line**: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar)
 **Carta de Serviços**: https://novatrento.sc.gov.br/cartaservicos/

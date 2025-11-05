@@ -97,11 +97,11 @@ ISS = Valor do Serviço × Alíquota
 
 ### 2.3. Base de cálculo
 
-**Regra geral**: Valor total do serviço (sem dedução de materiais)
+**Regra geral**: Valor total do serviço (sem dedução de materiais).
 
-**Exceções**:
-- Próteses dentárias: Deduz material
-- Subempreitadas: Deduz valor de NFS-e de subcontratados
+**Exceções (apenas se previstas em lei municipal vigente e devidamente comprovadas)**:
+- Próteses dentárias: Pode haver dedução de material quando expressamente prevista em lei e com comprovação.
+- Subempreitadas: Pode haver dedução do valor de NFS-e de subcontratados quando a legislação municipal permitir e houver documentação idônea.
 
 ### 2.4. Exemplo prático
 
@@ -110,12 +110,13 @@ ISS = Valor do Serviço × Alíquota
 - Alíquota: 5%
 - **ISS** = 3.000 × 5% = **R$ 150,00**
 
-**Obra de construção civil**:
+**Obra de construção civil** (exemplo hipotético com dedução de subempreitada):
 - Valor total: R$ 200.000,00
 - Subempreitada: R$ 50.000,00 (com NFS-e)
 - Base de cálculo: 200.000 - 50.000 = R$ 150.000
 - Alíquota: 2%
 - **ISS** = 150.000 × 2% = **R$ 3.000,00**
+Observação: Aplicável apenas se a dedução de subempreitada estiver prevista na legislação municipal do exercício.
 
 ### 2.5. ISS Fixo (Sociedade Uniprofissional)
 

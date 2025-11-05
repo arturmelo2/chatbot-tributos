@@ -4,7 +4,7 @@
 
 Guia completo para parcelamento de débitos tributários municipais em Nova Trento/SC.
 
-**Portal**: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+**Acesso**: Portal do Cidadão Web: https://e-gov.betha.com.br/cdweb/03114-502/ (o caminho interno pode mudar). Se não localizar a opção, use a Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
 
 ---
 
@@ -40,10 +40,11 @@ Guia completo para parcelamento de débitos tributários municipais em Nova Tren
 
 ### 2.1. Acesso ao portal
 
-1. Acessar: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
-2. Login com CPF/CNPJ + senha
-3. "Novo Protocolo"
+1. Acessar o Portal do Cidadão Web: https://e-gov.betha.com.br/cdweb/03114-502/
+2. Fazer login com CPF/CNPJ + senha
+3. Ir em "Protocolo" > "Novo Protocolo"
 4. Assunto: "Parcelamento de Débitos Tributários"
+5. Se o caminho tiver mudado, siga pela Carta de Serviços
 
 ### 2.2. Informações necessárias
 
@@ -348,4 +349,4 @@ Se possível:
 
 **Atualizado em**: Novembro/2025
 **Setor de Tributos - Prefeitura Municipal de Nova Trento/SC**
-**Protocolo on-line**: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+**Protocolo on-line**: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar). Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/

@@ -241,7 +241,7 @@ Comparecer ao Setor de Tributos com documentos da empresa.
 ### E-mail cadastrado está incorreto
 
 **Atualizar e-mail**:
-Protocolo on-line: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+Protocolo on-line: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar). Se não localizar, use a Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
 Assunto: "Atualização de e-mail cadastral"
 
 ### Sistema lento ou fora do ar
@@ -282,5 +282,5 @@ Assunto: "Atualização de e-mail cadastral"
 **Horário de atendimento**: Segunda a Sexta, 07h00 às 13h00
 **Contato**: Setor de Tributos - Prefeitura Municipal de Nova Trento/SC
 **Portal NFS-e**: https://e-gov.betha.com.br/nfse/03114-502/
-**Protocolo on-line**: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+**Protocolo on-line**: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar). Se não localizar, use a Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
 **Suporte técnico Betha**: 0800 646 2100

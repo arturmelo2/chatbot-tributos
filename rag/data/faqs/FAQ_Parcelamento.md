@@ -3,7 +3,7 @@
 ## 1. Como solicitar parcelamento de débitos?
 
 **Portal on-line**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+Portal do Cidadão Web: https://e-gov.betha.com.br/cdweb/03114-502/ (o caminho pode mudar). Se não localizar, use a Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
 
 **Assunto do protocolo**: "Solicitação de Parcelamento de Débitos Tributários"
 
@@ -159,7 +159,7 @@ Em casos de comprovada dificuldade financeira, a entrada pode ser:
 - Sem desconto adicional
 
 **Como solicitar**:
-Emitir guia de quitação antecipada no portal: https://e-gov.betha.com.br/cdweb/03114-502/
+Emitir guia de quitação antecipada no Portal do Cidadão Web (menu de Parcelamentos). Se o caminho tiver mudado, verifique a Carta de Serviços.
 
 ---
 
@@ -205,8 +205,8 @@ Após quitação ou parcelamento homologado, a Prefeitura desiste da execução 
 Se o débito foi protestado, após quitação ou parcelamento é emitida carta de anuência para baixa do protesto (custas do contribuinte).
 
 **Como solicitar**:
-Protocolo on-line: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
-Assunto: "Parcelamento de Dívida Ativa"
+Protocolo on-line: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar)
+Assunto: "Parcelamento de Dívida Ativa". Se não localizar, consulte a Carta de Serviços.
 
 **Documentos adicionais**:
 - Cópia da Certidão de Dívida Ativa (CDA)
@@ -219,5 +219,5 @@ Assunto: "Parcelamento de Dívida Ativa"
 
 **Horário de atendimento**: Segunda a Sexta, 07h00 às 13h00
 **Contato**: Setor de Tributos - Prefeitura Municipal de Nova Trento/SC
-**Protocolo on-line**: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
-**Consulta de débitos**: https://e-gov.betha.com.br/cdweb/03114-502/contribuinte/
+**Protocolo on-line**: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar). Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
+**Consulta de débitos**: Portal do Cidadão Web (menu Contribuinte). O caminho interno pode mudar.

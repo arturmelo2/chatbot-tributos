@@ -130,7 +130,7 @@ https://e-gov.betha.com.br/dms/03114-502/
 ## 7. Parcelamento de ISS em atraso
 
 **Como solicitar**:
-Protocolo on-line: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+Protocolo on-line: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar). Se não localizar, use a Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
 Assunto: "Parcelamento de débitos de ISS"
 
 **Condições**:
@@ -186,7 +186,7 @@ MEI paga ISS através do DAS (Documento de Arrecadação do Simples Nacional):
 - Serviços de transporte escolar
 
 **Como solicitar isenção/reconhecimento de imunidade**:
-Protocolo on-line: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+Protocolo on-line: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar). Se não localizar, use a Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
 Assunto: "Reconhecimento de Imunidade/Isenção de ISS"
 
 **Documentos**:
@@ -227,4 +227,4 @@ Assunto: "Reconhecimento de Imunidade/Isenção de ISS"
 **Horário de atendimento**: Segunda a Sexta, 07h00 às 13h00
 **Contato**: Setor de Tributos - Prefeitura Municipal de Nova Trento/SC
 **Portal NFS-e**: https://e-gov.betha.com.br/nfse/03114-502/
-**Protocolo on-line**: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+**Protocolo on-line**: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar). Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/

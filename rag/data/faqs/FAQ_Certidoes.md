@@ -2,14 +2,8 @@
 
 ## 1. Como emitir Certidão Negativa de Débitos (CND)?
 
-### Para CPF/CNPJ
-Acesse: https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbyHHcDK1V21w==
-
-### Para Inscrição Econômica (empresa)
-Acesse: https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZv1PWSEd5LZQ==
-
-### Para Inscrição Imobiliária (imóvel)
-Acesse: https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbLWCo87X0P1Q==
+### Para CPF/CNPJ, Inscrição Econômica ou Imobiliária
+Acesse o Portal do Cidadão Web: https://e-gov.betha.com.br/cdweb/03114-502/ e navegue até o menu de Certidões. Os nomes dos itens podem variar; se não localizar, utilize a Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
 
 **Quem pode solicitar**: Contribuinte pessoa física ou jurídica
 
@@ -32,8 +26,7 @@ Acesse: https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbLWCo87
 **Como emitir em Nova Trento**:
 CPEN **não é emitida on-line** no município.
 
-Se necessário, abrir Protocolo on-line e justificar o pedido:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+Se necessário, abra Protocolo on-line pelo Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar) e justifique o pedido. Use a Carta de Serviços se não localizar.
 
 ---
 
@@ -42,7 +35,7 @@ https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
 **O que é**: Certidão que comprova o valor venal cadastrado do imóvel para fins de IPTU.
 
 **Como emitir**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbBrVm4EIEgNA==
+Portal do Cidadão Web > Certidões > Certidão de Valor Venal (o caminho pode mudar). Caso não localize, utilize a Carta de Serviços.
 
 **Uso comum**:
 - Financiamentos imobiliários
@@ -65,9 +58,7 @@ https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbBrVm4EIEgNA==
 
 **Soluções**:
 1. Aguarde 2-3 dias úteis após o pagamento (compensação bancária)
-2. Se persistir, abra protocolo com comprovante de pagamento:
-   https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
-   Assunto: "Baixa de débito pago - Certidão"
+2. Se persistir, abra protocolo com comprovante de pagamento pelo Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar). Assunto: "Baixa de débito pago - Certidão".
 
 **Documentos necessários**:
 - Comprovante de pagamento autenticado
@@ -91,8 +82,8 @@ https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbBrVm4EIEgNA==
 
 ## 7. Consulta cadastral do contribuinte
 
-**Link de acesso**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=I4_rlvksxq4RhutUNw1QjA==
+**Acesso**:
+Portal do Cidadão Web > Consulta Cadastral (o nome do menu pode variar). Se não localizar, utilize a Carta de Serviços.
 
 **O que consultar**:
 - Dados cadastrais (endereço, atividade, inscrição)
@@ -104,8 +95,8 @@ https://e-gov.betha.com.br/cdweb/resource.faces?params=I4_rlvksxq4RhutUNw1QjA==
 
 ## 8. Atualizar dados cadastrais
 
-**Link de cadastro/atualização**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7fCNxNE3Jehpg==
+**Cadastro/Atualização**:
+Portal do Cidadão Web > Atualização Cadastral (o caminho pode mudar). Se não localizar, utilize a Carta de Serviços.
 
 **Quem usa**:
 - Contribuinte (pessoa física ou jurídica)
@@ -127,8 +118,8 @@ https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7fCNxNE3Jehpg==
 
 ## 9. Validar autenticidade de certidão
 
-**Link de validação**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=liyWcyOMEeNvFkekCbDSzA==
+**Validação**:
+Portal do Cidadão Web > Validação de Documentos/Certidões (o caminho pode mudar). Se não localizar, utilize a Carta de Serviços.
 
 **Como validar**:
 1. Acesse o link acima
@@ -144,7 +135,7 @@ https://e-gov.betha.com.br/cdweb/resource.faces?params=liyWcyOMEeNvFkekCbDSzA==
 **O que é**: Certidão que comprova o recolhimento do Imposto de Transmissão de Bens Imóveis.
 
 **Como solicitar**:
-https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZT5aW4KbNY7A==
+Portal do Cidadão Web > ITBI > Certidão de ITBI (o caminho pode mudar). Se não localizar, utilize a Carta de Serviços.
 
 **Quando é necessária**:
 - Registro de escritura pública de compra e venda
@@ -157,4 +148,4 @@ https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZT5aW4KbNY7A==
 
 **Horário de atendimento**: Segunda a Sexta, 07h00 às 13h00
 **Contato**: Setor de Tributos - Prefeitura Municipal de Nova Trento/SC
-**Protocolo on-line**: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==
+**Protocolo on-line**: Portal do Cidadão Web > Protocolo > Novo Protocolo (o caminho pode mudar). Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/
