@@ -20,7 +20,7 @@ services:
     ports:
       - '3000:3000'
     environment:
-      - WHATSAPP_HOOK_URL=http://n8n:5678/webhook/8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b/waha
+  - 'WHATSAPP_HOOK_URL=http://n8n:5678/webhook/94a8adfc-1dba-41e7-be61-4c13b51fa08e'
       - WHATSAPP_HOOK_EVENTS=message,session.status
       - HOST=0.0.0.0
       # Credenciais FIXAS - não mudam entre restarts
