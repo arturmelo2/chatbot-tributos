@@ -1,0 +1,291 @@
+# =============================================================================
+# Chatbot de Tributos - Production Stack (Zero-Touch Deployment)
+# =============================================================================
+# Stack completo com HTTPS automático, bootstrap do n8n, e auto-configuração
+# 
+# Pré-requisitos:
+# 1. Configure .env com suas credenciais
+# 2. Configure DNS apontando para seu servidor
+# 3. Opcional: coloque backup de sessão WAHA em ./data/waha/session/
+# 4. Execute: docker compose -f compose.prod.yml up -d
+# 
+# Após primeira inicialização:
+# - n8n: Usuário criado automaticamente (credenciais do .env)
+# - WAHA: Sessão auto-restaurada (se backup presente) ou escanear QR code
+# - API: Knowledge base carregado automaticamente
+# - HTTPS: Certificados Let's Encrypt configurados automaticamente
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # Traefik - Reverse Proxy com Auto HTTPS
+  # ---------------------------------------------------------------------------
+  traefik:
+    image: traefik:v2.10
+    container_name: chatbot_traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Dashboard (desabilite em produção ou adicione auth)
+    environment:
+      - CF_API_EMAIL=${CF_API_EMAIL:-}
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN:-}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./reverse-proxy/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./reverse-proxy/acme.json:/acme.json
+      - traefik-logs:/var/log/traefik
+    networks:
+      - chatbot_network
+    labels:
+      - "traefik.enable=true"
+      # Dashboard (remova em produção ou adicione autenticação)
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ---------------------------------------------------------------------------
+  # Redis - Cache & Message Queue
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: chatbot_redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - chatbot_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # ChromaDB - Vector Database (Standalone)
+  # ---------------------------------------------------------------------------
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: chatbot_chromadb
+    restart: unless-stopped
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    volumes:
+      - ./data/chroma:/chroma/chroma
+    networks:
+      - chatbot_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ---------------------------------------------------------------------------
+  # WAHA - WhatsApp HTTP API (Auto-Restore Session)
+  # ---------------------------------------------------------------------------
+  waha:
+    image: devlikeapro/waha:latest
+    container_name: chatbot_waha
+    restart: unless-stopped
+    environment:
+      - WHATSAPP_HOOK_URL=http://n8n:5678/webhook/${N8N_WEBHOOK_ID:-94a8adfc-1dba-41e7-be61-4c13b51fa08e}
+      - WHATSAPP_HOOK_EVENTS=message,session.status
+      - WAHA_API_KEY=${WAHA_API_KEY:-tributos_nova_trento_2025_api_key_fixed}
+      - WAHA_DASHBOARD_USERNAME=${WAHA_DASHBOARD_USERNAME:-admin}
+      - WAHA_DASHBOARD_PASSWORD=${WAHA_DASHBOARD_PASSWORD:-Tributos@NovaTrento2025}
+      # Auto-start session on boot
+      - WHATSAPP_START_SESSION=default
+      - WHATSAPP_RESTART_ALL_SESSIONS=true
+    volumes:
+      - ./data/waha:/app/.waha
+      # Pre-populated session backup goes in ./data/waha/session/
+    networks:
+      - chatbot_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.waha.rule=Host(`waha.${DOMAIN}`)"
+      - "traefik.http.routers.waha.entrypoints=websecure"
+      - "traefik.http.routers.waha.tls.certresolver=letsencrypt"
+      - "traefik.http.services.waha.loadbalancer.server.port=3000"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ---------------------------------------------------------------------------
+  # n8n - Workflow Automation (Auto-Bootstrap)
+  # ---------------------------------------------------------------------------
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: chatbot_n8n
+    restart: unless-stopped
+    environment:
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-https}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - WEBHOOK_URL=https://n8n.${DOMAIN}/
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - N8N_METRICS=true
+      # Auto-create owner user on first boot
+      - N8N_OWNER_EMAIL=${N8N_OWNER_EMAIL:-admin@localhost}
+      - N8N_OWNER_PASSWORD=${N8N_OWNER_PASSWORD}
+      - N8N_OWNER_FIRST_NAME=${N8N_OWNER_FIRST_NAME:-Admin}
+      - N8N_OWNER_LAST_NAME=${N8N_OWNER_LAST_NAME:-Chatbot}
+      # Community nodes
+      - N8N_COMMUNITY_PACKAGES=${N8N_COMMUNITY_PACKAGES:-n8n-nodes-waha}
+      # LLM integrations
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - XAI_API_KEY=${XAI_API_KEY:-}
+      # WAHA credentials for bootstrap
+      - WAHA_API_KEY=${WAHA_API_KEY:-tributos_nova_trento_2025_api_key_fixed}
+    volumes:
+      - ./data/n8n:/home/node/.n8n
+      - ./n8n/workflows:/home/node/.n8n/workflows:ro
+      - ./deploy/bootstrap/n8n-bootstrap.sh:/scripts/bootstrap.sh:ro
+    networks:
+      - chatbot_network
+    depends_on:
+      redis:
+        condition: service_healthy
+      waha:
+        condition: service_started
+    # Bootstrap script integration
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        # Executar bootstrap na primeira inicialização
+        if [ -f "/scripts/bootstrap.sh" ]; then
+          /scripts/bootstrap.sh
+        fi
+        # Iniciar n8n
+        exec tini -- /docker-entrypoint.sh n8n start
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.n8n.rule=Host(`n8n.${DOMAIN}`)"
+      - "traefik.http.routers.n8n.entrypoints=websecure"
+      - "traefik.http.routers.n8n.tls.certresolver=letsencrypt"
+      - "traefik.http.services.n8n.loadbalancer.server.port=5678"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5678/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ---------------------------------------------------------------------------
+  # API - Chatbot Backend (FastAPI/Flask com Auto Knowledge Load)
+  # ---------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: chatbot_api
+    restart: unless-stopped
+    environment:
+      # LLM
+      - LLM_PROVIDER=${LLM_PROVIDER:-groq}
+      - LLM_MODEL=${LLM_MODEL:-llama-3.3-70b-versatile}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - XAI_API_KEY=${XAI_API_KEY}
+      # Vector DB
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-sentence-transformers/all-MiniLM-L6-v2}
+      # WAHA
+      - WAHA_API_URL=http://waha:3000
+      - WAHA_API_KEY=${WAHA_API_KEY:-tributos_nova_trento_2025_api_key_fixed}
+      # Redis
+      - REDIS_URL=redis://redis:6379
+      # App
+      - PORT=5000
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # Auto-load knowledge on startup
+      - AUTO_LOAD_KNOWLEDGE=${AUTO_LOAD_KNOWLEDGE:-true}
+      - KNOWLEDGE_PATH=/app/rag/data
+      - CHROMA_DIR=/app/chroma_data
+    volumes:
+      - ./rag/data:/app/rag/data:ro
+      - ./logs:/app/logs
+      - ./exports:/app/exports
+      - ./data/chroma:/app/chroma_data
+      - ./scripts/wait-for.sh:/scripts/wait-for.sh:ro
+      - ./scripts/load-knowledge.sh:/scripts/load-knowledge.sh:ro
+    networks:
+      - chatbot_network
+    depends_on:
+      chromadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      n8n:
+        condition: service_started
+    # Wait for ChromaDB to be ready, then load knowledge
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        # Aguardar ChromaDB
+        /scripts/wait-for.sh chromadb:8000 -t 60 --
+        
+        # Auto-carregar knowledge base
+        if [ "$AUTO_LOAD_KNOWLEDGE" = "true" ]; then
+          echo "🔄 Auto-loading knowledge base..."
+          /scripts/load-knowledge.sh
+        fi
+        
+        # Iniciar API
+        exec python app.py
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api.${DOMAIN}`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.api.loadbalancer.server.port=5000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+
+# -----------------------------------------------------------------------------
+# Networks
+# -----------------------------------------------------------------------------
+networks:
+  chatbot_network:
+    driver: bridge
+
+# -----------------------------------------------------------------------------
+# Volumes (all in ./data/ for easy backup)
+# -----------------------------------------------------------------------------
+volumes:
+  traefik-logs:
