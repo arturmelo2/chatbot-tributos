@@ -1,0 +1,125 @@
+{
+  "name": "Chatbot RAG - API Python (Completo)",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "94a8adfc-1dba-41e7-be61-4c13b51fa08e",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-waha-001",
+      "name": "Webhook WAHA",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "94a8adfc-1dba-41e7-be61-4c13b51fa08e"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "filter-no-groups",
+              "leftValue": "={{ $json.payload?.from || $json.from }}",
+              "rightValue": "@g.us",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "filter-not-from-me",
+              "leftValue": "={{ $json.payload?.fromMe || $json.fromMe }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-messages-001",
+      "name": "Filtrar Mensagens",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://api:5000/chatbot/webhook/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "call-api-001",
+      "name": "Chamar API Python",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "content": "## 🤖 Workflow RAG Simplificado\n\n**Fluxo**: WhatsApp → WAHA → n8n → API Python (RAG)\n\n### ✅ Funcionalidades:\n- Filtra mensagens de grupo\n- Filtra mensagens próprias\n- Envia para API Python com RAG completo\n- API retorna resposta e envia via WAHA\n\n### 📊 Base de Conhecimento:\n- **65 documentos**\n- **461 chunks vetorizados**\n- ChromaDB + Groq LLM\n\n### 🔗 Endpoint API:\n`http://api:5000/chatbot/webhook/`",
+        "height": 464,
+        "width": 389,
+        "color": 4
+      },
+      "id": "sticky-note-001",
+      "name": "Nota Explicativa",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, 480]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook WAHA": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Mensagens": {
+      "main": [
+        [
+          {
+            "node": "Chamar API Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

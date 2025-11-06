@@ -170,6 +170,83 @@ def webhook():
 # =============================================================================
 # Rota Principal (info da API)
 # =============================================================================
+@app.route("/rag/search", methods=["POST"])
+def rag_search():
+    """Endpoint para busca RAG no ChromaDB."""
+    try:
+        data = request.json
+        query = data.get("query", "")
+        k = data.get("k", 10)
+        search_type = data.get("search_type", "mmr")
+        lambda_mult = data.get("lambda_mult", 0.5)
+
+        if not query:
+            return jsonify({"error": "Query é obrigatória"}), 400
+
+        logger.info(f"🔍 Busca RAG: '{query[:50]}...' (k={k}, type={search_type})")
+
+        # Usar AIBot para fazer a busca
+        ai_bot = AIBot()
+        results = ai_bot.search_knowledge(
+            query=query,
+            k=k,
+            search_type=search_type,
+            lambda_mult=lambda_mult,
+        )
+
+        return jsonify({"query": query, "results": results, "count": len(results)}), 200
+
+    except Exception as e:
+        logger.error(f"❌ Erro na busca RAG: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/llm/invoke", methods=["POST"])
+def llm_invoke():
+    """Endpoint para invocar o LLM diretamente."""
+    try:
+        data = request.json
+        messages = data.get("messages", [])
+        temperature = data.get("temperature", 0.3)
+        max_tokens = data.get("max_tokens", 1500)
+
+        if not messages:
+            return jsonify({"error": "Messages são obrigatórias"}), 400
+
+        logger.info(f"🤖 Invocando LLM (temp={temperature}, max_tokens={max_tokens})")
+
+        # Usar AIBot para invocar LLM
+        ai_bot = AIBot()
+        
+        # Converter para formato esperado
+        history = []
+        question = ""
+        for msg in messages:
+            if msg.get("role") == "system":
+                continue  # System prompt será usado internamente
+            elif msg.get("role") == "user":
+                question = msg.get("content", "")
+            elif msg.get("role") == "assistant":
+                if question:
+                    history.append({"role": "user", "content": question})
+                    question = ""
+                history.append({"role": "assistant", "content": msg.get("content", "")})
+
+        # Invocar com o último user message
+        response = ai_bot.invoke_with_context(
+            history_messages=history,
+            question=question,
+            context=messages[0].get("content", "") if messages else "",
+            temperature=temperature,
+        )
+
+        return jsonify({"response": response, "model": ai_bot.model_name}), 200
+
+    except Exception as e:
+        logger.error(f"❌ Erro ao invocar LLM: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/", methods=["GET"])
 def index():
     """Página inicial com informações da API."""
@@ -182,6 +259,8 @@ def index():
             "endpoints": {
                 "health": "/health",
                 "webhook": "/chatbot/webhook/",
+                "rag_search": "/rag/search",
+                "llm_invoke": "/llm/invoke",
             },
         }
     ), 200

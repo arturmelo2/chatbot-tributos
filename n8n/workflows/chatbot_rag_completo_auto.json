@@ -1,0 +1,371 @@
+{
+  "name": "Chatbot RAG Completo - Auto Configurado",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "94a8adfc-1dba-41e7-be61-4c13b51fa08e",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-001",
+      "name": "Webhook WAHA",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "94a8adfc-1dba-41e7-be61-4c13b51fa08e"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "no-groups",
+              "leftValue": "={{ $json.payload?.from || $json.from }}",
+              "rightValue": "@g.us",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "not-from-me",
+              "leftValue": "={{ $json.payload?.fromMe || $json.fromMe }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-001",
+      "name": "Filtrar Mensagens",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extrair dados da mensagem\nconst payload = $input.item.json.payload || $input.item.json;\n\nreturn {\n  chatId: payload.from,\n  question: payload.body || payload.text?.body || '',\n  fromMe: payload.fromMe || false,\n  timestamp: payload.timestamp || Date.now()\n};"
+      },
+      "id": "prepare-001",
+      "name": "Preparar Dados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $json.chatId }}\",\n  \"text\": \"typing\"\n}",
+        "options": {}
+      },
+      "id": "typing-start-001",
+      "name": "Iniciar Digitando",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "waha-header-auth",
+          "name": "WAHA API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://api:5000/rag/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"{{ $json.question }}\",\n  \"k\": 10,\n  \"search_type\": \"mmr\",\n  \"lambda_mult\": 0.5\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "rag-search-001",
+      "name": "Buscar Conhecimento (RAG)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Processar resultados da busca RAG\nconst results = $input.item.json.results || [];\nconst question = $input.item.json.query || $('Preparar Dados').item.json.question;\n\n// Formatar contexto\nconst context = results.map((doc, idx) => {\n  const source = doc.metadata?.source || 'Documento';\n  return `[${idx + 1}] ${doc.page_content}\\n[Fonte: ${source}]`;\n}).join('\\n\\n---\\n\\n');\n\n// Criar prompt para LLM\nconst systemPrompt = `Você é um assistente especializado em tributos municipais de Nova Trento/SC.\n\nUSE APENAS as informações fornecidas no CONTEXTO abaixo para responder.\n\nSe a informação não estiver no contexto, responda:\n\"Desculpe, não encontrei informações suficientes na base de conhecimento sobre esse assunto. Por favor, entre em contato com a Prefeitura pelo telefone (47) 3267-8600 ou visite nossa sede.\"\n\nSempre cite as fontes ([Fonte: ...]) ao final da resposta.\n\nCONTEXTO:\n${context}\n\nQUESTÃO: ${question}\n\nRESPOSTA (seja claro, objetivo e cite as fontes):`;\n\nreturn {\n  chatId: $('Preparar Dados').item.json.chatId,\n  question: question,\n  context: context,\n  systemPrompt: systemPrompt,\n  numResults: results.length\n};"
+      },
+      "id": "format-context-001",
+      "name": "Formatar Contexto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://api:5000/llm/invoke",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"{{ $json.systemPrompt }}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.question }}\"\n    }\n  ],\n  \"temperature\": 0.3,\n  \"max_tokens\": 1500\n}",
+        "options": {
+          "timeout": 45000
+        }
+      },
+      "id": "llm-invoke-001",
+      "name": "Gerar Resposta (Groq LLM)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extrair resposta do LLM\nconst llmResponse = $input.item.json;\nconst response = llmResponse.response || llmResponse.content || llmResponse.text || 'Desculpe, houve um erro ao processar sua solicitação.';\n\nconst chatId = $('Preparar Dados').item.json.chatId;\n\n// Limitar tamanho (WhatsApp tem limite)\nconst maxLength = 4000;\nconst finalResponse = response.length > maxLength \n  ? response.substring(0, maxLength) + '\\n\\n... (resposta truncada)'\n  : response;\n\nreturn {\n  chatId: chatId,\n  response: finalResponse,\n  originalLength: response.length,\n  truncated: response.length > maxLength\n};"
+      },
+      "id": "format-response-001",
+      "name": "Formatar Resposta Final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $json.chatId }}\",\n  \"text\": \"{{ $json.response }}\"\n}",
+        "options": {}
+      },
+      "id": "send-whatsapp-001",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "waha-header-auth",
+          "name": "WAHA API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('Preparar Dados').item.json.chatId }}\",\n  \"text\": \"\"\n}",
+        "options": {}
+      },
+      "id": "typing-stop-001",
+      "name": "Parar Digitando",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2220, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "waha-header-auth",
+          "name": "WAHA API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🤖 RAG Completo - Configuração Automática\n\n### ✅ Pipeline:\n1. Webhook recebe mensagem\n2. Filtra grupos e mensagens próprias\n3. Prepara dados (chatId, pergunta)\n4. Inicia typing indicator\n5. **Busca RAG** (10 docs, MMR)\n6. Formata contexto com sources\n7. **Groq LLM** gera resposta\n8. Formata resposta final\n9. Envia via WhatsApp\n10. Para typing indicator\n\n### 📊 Base:\n- **ChromaDB**: http://api:5000\n- **Collection**: tributos_docs\n- **Docs**: 65 | **Chunks**: 461\n- **Embeddings**: all-MiniLM-L6-v2",
+        "height": 540,
+        "width": 420,
+        "color": 4
+      },
+      "id": "sticky-001",
+      "name": "Pipeline RAG",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, 520]
+    },
+    {
+      "parameters": {
+        "content": "## ⚙️ Configuração LLM\n\n**Provider**: Groq\n**Model**: llama-3.3-70b-versatile\n**Temperature**: 0.3 (preciso)\n**Max Tokens**: 1500\n**Timeout**: 45s\n\n### RAG Search:\n- **k**: 10 documentos\n- **Type**: MMR (diversidade)\n- **Lambda**: 0.5 (balanceado)",
+        "height": 380,
+        "width": 340,
+        "color": 5
+      },
+      "id": "sticky-002",
+      "name": "Configuração",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1340, 520]
+    },
+    {
+      "parameters": {
+        "content": "## 🔐 Credenciais\n\n**WAHA API**:\n- Key: tributos_nova_trento_2025_api_key_fixed\n- Header: X-Api-Key\n\n**API Python**:\n- URL: http://api:5000\n- Endpoints:\n  - /rag/search (busca vetorial)\n  - /llm/invoke (LLM)\n\n**ChromaDB**:\n- Embeddings já carregados\n- 461 chunks prontos",
+        "height": 400,
+        "width": 360,
+        "color": 6
+      },
+      "id": "sticky-003",
+      "name": "Credenciais",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1780, 520]
+    }
+  ],
+  "connections": {
+    "Webhook WAHA": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Mensagens": {
+      "main": [
+        [
+          {
+            "node": "Preparar Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Dados": {
+      "main": [
+        [
+          {
+            "node": "Iniciar Digitando",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Iniciar Digitando": {
+      "main": [
+        [
+          {
+            "node": "Buscar Conhecimento (RAG)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Conhecimento (RAG)": {
+      "main": [
+        [
+          {
+            "node": "Formatar Contexto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Contexto": {
+      "main": [
+        [
+          {
+            "node": "Gerar Resposta (Groq LLM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar Resposta (Groq LLM)": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Resposta Final": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Parar Digitando",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

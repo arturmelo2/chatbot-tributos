@@ -1,0 +1,415 @@
+{
+  "name": "🤖 Chatbot RAG Tributos - WhatsApp + ChromaDB + Groq",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "94a8adfc-1dba-41e7-be61-4c13b51fa08e",
+        "options": {}
+      },
+      "id": "webhook-waha",
+      "name": "Webhook WAHA",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [300, 400],
+      "webhookId": "94a8adfc-1dba-41e7-be61-4c13b51fa08e"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.payload.from }}",
+              "operation": "notContains",
+              "value2": "@g.us"
+            },
+            {
+              "value1": "={{ $json.payload.fromMe }}",
+              "operation": "equal",
+              "value2": "false"
+            }
+          ]
+        }
+      },
+      "id": "filter-messages",
+      "name": "Filtrar Mensagens",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [520, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatId = $input.item.json.payload.from;\nconst messageText = $input.item.json.payload.body || '';\n\nreturn {\n  chatId: chatId,\n  question: messageText,\n  timestamp: Date.now()\n};"
+      },
+      "id": "prepare-data",
+      "name": "Preparar Dados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [740, 400]
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Você é um assistente especializado em tributos municipais de Nova Trento/SC. Use APENAS as informações fornecidas pela base de conhecimento para responder. Se não souber, diga que não tem informação suficiente. Seja claro, objetivo e use linguagem acessível. Sempre cite a fonte da informação."
+        }
+      },
+      "id": "ai-agent",
+      "name": "AI Agent RAG",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [960, 400]
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "temperature": 0.3,
+          "maxTokens": 1000
+        }
+      },
+      "id": "groq-chat-model",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [848, 624],
+      "credentials": {
+        "groqApi": {
+          "id": "groq-credentials",
+          "name": "Groq API"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "window-memory",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [1056, 656]
+    },
+    {
+      "parameters": {
+        "name": "Base_Conhecimento_Tributos",
+        "description": "Use esta ferramenta para buscar informações sobre tributos municipais, leis, procedimentos, FAQs e manuais de Nova Trento/SC. Contém documentação completa sobre IPTU, ISS, ITBI, certidões, alvarás e parcelamentos.",
+        "options": {
+          "topK": 5
+        }
+      },
+      "id": "vector-store-tool",
+      "name": "Vector Store Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [1216, 624]
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "id": "groq-summarizer",
+      "name": "Groq Summarizer",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [1472, 800],
+      "credentials": {
+        "groqApi": {
+          "id": "groq-credentials",
+          "name": "Groq API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "retrieve",
+        "options": {}
+      },
+      "id": "chroma-vector-store",
+      "name": "ChromaDB Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreChroma",
+      "typeVersion": 1,
+      "position": [1072, 872],
+      "credentials": {
+        "chromaApi": {
+          "id": "chroma-credentials",
+          "name": "ChromaDB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "sentence-transformers/all-MiniLM-L6-v2",
+        "options": {}
+      },
+      "id": "embeddings-hf",
+      "name": "HuggingFace Embeddings",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [1120, 1104],
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "hf-credentials",
+          "name": "HuggingFace API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.item.json.output;\nconst chatId = $input.item.json.chatId;\n\nreturn {\n  chatId: chatId,\n  response: response\n};"
+      },
+      "id": "format-response",
+      "name": "Formatar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1180, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "wahaApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"chatId\": \"{{ $json.chatId }}\",\n  \"text\": \"{{ $json.response }}\",\n  \"session\": \"default\"\n}",
+        "options": {}
+      },
+      "id": "send-to-whatsapp",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1400, 400],
+      "credentials": {
+        "wahaApi": {
+          "id": "waha-credentials",
+          "name": "WAHA API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/default/typing",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "wahaApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"chatId\": \"{{ $json.chatId }}\",\n  \"isTyping\": true\n}",
+        "options": {}
+      },
+      "id": "start-typing",
+      "name": "Iniciar Digitando",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [740, 560],
+      "credentials": {
+        "wahaApi": {
+          "id": "waha-credentials",
+          "name": "WAHA API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/default/typing",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "wahaApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"chatId\": \"{{ $json.chatId }}\",\n  \"isTyping\": false\n}",
+        "options": {}
+      },
+      "id": "stop-typing",
+      "name": "Parar Digitando",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1400, 560],
+      "credentials": {
+        "wahaApi": {
+          "id": "waha-credentials",
+          "name": "WAHA API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Webhook WAHA\nRecebe mensagens do WhatsApp via WAHA",
+        "height": 80,
+        "width": 240
+      },
+      "id": "note-webhook",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, 280]
+    },
+    {
+      "parameters": {
+        "content": "## RAG com ChromaDB + Groq\nBusca na base de conhecimento e gera resposta com LLM",
+        "height": 140,
+        "width": 680
+      },
+      "id": "note-rag",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [800, 520]
+    },
+    {
+      "parameters": {
+        "content": "## Typing Indicators\nMostra que o bot está processando",
+        "height": 80,
+        "width": 200
+      },
+      "id": "note-typing",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [680, 480]
+    }
+  ],
+  "connections": {
+    "Webhook WAHA": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Mensagens": {
+      "main": [
+        [
+          {
+            "node": "Preparar Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Dados": {
+      "main": [
+        [
+          {
+            "node": "Iniciar Digitando",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent RAG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent RAG": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent RAG",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent RAG",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent RAG",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Summarizer": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Vector Store Tool",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ChromaDB Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Tool",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HuggingFace Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "ChromaDB Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Parar Digitando",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-11-06T00:00:00.000Z",
+  "versionId": "1"
+}

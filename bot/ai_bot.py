@@ -302,3 +302,96 @@ class AIBot:
             )
 
         return text
+
+    def search_knowledge(
+        self,
+        query: str,
+        k: int = 10,
+        search_type: str = "mmr",
+        lambda_mult: float = 0.5,
+    ) -> List[Dict[str, Any]]:
+        """
+        Busca direta no ChromaDB sem invocar LLM.
+        
+        Args:
+            query: Texto da busca
+            k: Número de documentos a retornar
+            search_type: Tipo de busca ('mmr' ou 'similarity')
+            lambda_mult: Parâmetro de diversidade para MMR (0=max diversidade, 1=max relevância)
+            
+        Returns:
+            Lista de documentos com page_content e metadata
+        """
+        settings = get_settings()
+        persist_directory = settings.CHROMA_DIR
+        embedding_model = settings.EMBEDDING_MODEL
+        embedding = HuggingFaceEmbeddings(model_name=embedding_model)
+
+        vector_store = Chroma(
+            persist_directory=persist_directory,
+            embedding_function=embedding,
+        )
+        
+        retriever = vector_store.as_retriever(
+            search_type=search_type,
+            search_kwargs={"k": k, "lambda_mult": lambda_mult} if search_type == "mmr" else {"k": k},
+        )
+        
+        docs = retriever.invoke(query)
+        
+        # Converter para formato serializável
+        return [
+            {
+                "page_content": doc.page_content,
+                "metadata": doc.metadata,
+            }
+            for doc in docs
+        ]
+
+    def invoke_with_context(
+        self,
+        history_messages: List[Dict[str, str]],
+        question: str,
+        context: str,
+        temperature: float = 0.3,
+    ) -> str:
+        """
+        Invoca LLM com contexto pré-fornecido (sem busca RAG).
+        
+        Args:
+            history_messages: Histórico de conversa
+            question: Pergunta atual
+            context: Contexto já formatado (ex: system prompt com documentos)
+            temperature: Temperatura do LLM (0=determinístico, 1=criativo)
+            
+        Returns:
+            Resposta do LLM
+        """
+        # Converter histórico
+        lc_history: List[BaseMessage] = _to_langchain_messages(history_messages)
+        
+        # Adicionar pergunta atual
+        if question:
+            lc_history.append(HumanMessage(content=question))
+        
+        # Invocar com contexto fornecido
+        formatted_prompt = self.__qa_prompt.invoke(
+            {
+                "context": context,
+                "messages": lc_history,
+            }
+        )
+        
+        response = self.__chat.invoke(formatted_prompt)
+        
+        # Extrair resposta
+        content: str | None = getattr(response, "content", None)
+        if content is not None:
+            return str(content).strip()
+        return str(response).strip()
+    
+    @property
+    def model_name(self) -> str:
+        """Retorna o nome do modelo LLM em uso."""
+        settings = get_settings()
+        return settings.LLM_MODEL or "unknown"
