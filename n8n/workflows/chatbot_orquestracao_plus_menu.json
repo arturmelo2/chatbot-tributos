@@ -138,4 +138,770 @@
         "url": "http://waha:3000/api/sendText",
         "jsonParameters": true,
         "options": {},
-        "bodyParametersJson": 
+        "bodyParametersJson": "={\"chatId\":\"={{$json.chat_id}}\",\"text\":\"Muitas mensagens em pouco tempo. Vou responder na sequência, ok? ⏳\"}"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "WAHA API"
+        }
+      }
+    },
+    {
+      "id": "a5f83446-4517-42cc-97ce-dc2654e24a88",
+      "name": "Log Throttle",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        -40
+      ],
+      "parameters": {
+        "language": "javascript",
+        "jsCode": "console.log(JSON.stringify({lvl:'info',evt:'throttle',chat_id:$json.chat_id,count:$json.rateCount})); return items;"
+      }
+    },
+    {
+      "id": "90ec9ac9-1973-4687-bd40-bf4868852573",
+      "name": "Checar Horário Comercial",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        220
+      ],
+      "parameters": {
+        "language": "javascript",
+        "jsCode": "function toMinutes(hhmm){const [h,m]=(hhmm||'00:00').split(':').map(x=>parseInt(x,10));return h*60+(m||0)}\nconst start=toMinutes($env.HOURS_START||'07:00');\nconst end=toMinutes($env.HOURS_END||'13:00');\nconst workdays=($env.WORKDAYS||'1,2,3,4,5').split(',').map(x=>parseInt(x.trim(),10));\nconst now=new Date(); const day=((now.getDay()+6)%7)+1;\nconst minutes=now.getHours()*60+now.getMinutes();\nconst inHours=workdays.includes(day)&&minutes>=start&&minutes<=end;\nreturn items.map(it=>{it.json.inBusinessHours=inHours;return it;});"
+      }
+    },
+    {
+      "id": "bb3e43be-d050-4172-9119-41148cf889c8",
+      "name": "Router de Comandos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1580,
+        220
+      ],
+      "parameters": {
+        "language": "javascript",
+        "jsCode": "const sd=this.getWorkflowStaticData('global'); sd.human=sd.human||{};\nreturn items.map(it=>{\n  const chatId=it.json.chat_id; const text=(it.json.message||'').trim();\n  let name=null,args=''; if(text.startsWith('/')){const parts=text.split(' ');name=parts[0].toLowerCase();args=parts.slice(1).join(' ')}\n  it.json.cmd={isCmd:!!name,name,args};\n  if(name==='/humano'){sd.human[chatId]=true; it.json.handoff=Object.assign({},it.json.handoff,{forceHuman:true,reason:'cmd'})}\n  else if(name==='/bot'){sd.human[chatId]=false; it.json.handoff=Object.assign({},it.json.handoff,{forceBot:true,reason:'cmd'})}\n  else{const pref=sd.human[chatId]; if(pref===true) it.json.handoff=Object.assign({},it.json.handoff,{preferHuman:true,reason:'stored'});\n       if(pref===false) it.json.handoff=Object.assign({},it.json.handoff,{preferBot:true,reason:'stored'})}\n  return it;\n});"
+      }
+    },
+    {
+      "id": "918db640-b621-4bbe-a216-58f61a8d0da0",
+      "name": "Carregar Fluxo",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1840,
+        80
+      ],
+      "parameters": {
+        "keepOnlySet": false,
+        "values": {
+          "string": [
+            {
+              "name": "flow_nodeList",
+              "value": "[{\"id\": \"start\", \"name\": \"Início\", \"type\": \"start\", \"left\": \"26px\", \"top\": \"100px\", \"ico\": \"mdi-play\", \"viewOnly\": true, \"status\": \"success\", \"style\": {}}, {\"id\": \"configurations\", \"name\": \"Configurações\", \"type\": \"configurations\", \"left\": \"340px\", \"top\": \"100px\", \"viewOnly\": true, \"ico\": \"mdi-alert-circle-outline\", \"configurations\": {\"notOptionsSelectMessage\": {\"message\": \"Não identificamos sua resposta! Por favor digite uma opção válida.\", \"stepReturn\": \"A\"}, \"notResponseMessage\": {\"time\": 10, \"type\": 3, \"destiny\": \"\", \"message\": \"Seu atendimento será encerrado por falta de resposta.\\nAgradecemos seu contato!\"}, \"welcomeMessage\": {\"message\": \"Em breve você será atendido pela nossa equipe!\\n\\nNosso horário de atendimento é de Segunda-Feira à Sexta-Feira das 07h00 às 13h00.\"}, \"farewellMessage\": {\"message\": \"O Setor de Tributos da Prefeitura Municipal de Nova Trento agradece seu contato!\"}, \"maxRetryBotMessage\": {\"number\": 3, \"type\": 3, \"destiny\": \"\"}, \"outOpenHours\": {\"type\": 3, \"destiny\": null}, \"firstInteraction\": {\"type\": 1, \"destiny\": null}, \"keyword\": {\"message\": \"\"}, \"autoDistributeTickets\": \"N\", \"answerCloseTicket\": [\"#sair\", \"#encerrar\"]}}, {\"id\": \"nodeC\", \"name\": \"Boas vindas!\", \"type\": \"node\", \"left\": \"26px\", \"top\": \"301px\", \"interactions\": [{\"type\": \"MessageField\", \"data\": {\"message\": \"Olá!\\n\\nSeja bem-vindo(a) {{name}} ao atendimento virtual da *Prefeitura Municipal de Nova Trento*.\\n\\n*Seu protocolo de atendimento é {{protocol}}*.\"}}, {\"type\": \"MessageField\", \"data\": {\"message\": \"Informamos que ao utilizar esse meio de comunicação você estará autorizando a Prefeitura a enviar mensagens (SMS,  Texto, E-mail, WhatsApp) e documentos (taxas, guias, dentre outros) com conteúdo relativo aos serviços públicos prestados para os munícipes, de acordo com as diretrizes da Lei Geral de Proteção de Dados (LGPD), conforme Lei 13.709/18.\\n\\n*Informamos que não ouvimos mensagens de voz e não aceitamos ligações neste canal de atentimento!*\\n\\nDigite *1* para continuar com o atendimento.\\nDigite *2* para encerrar o atendimento.\"}}], \"conditions\": [{\"type\": \"R\", \"condition\": [\"1\"], \"action\": 0, \"nextStepId\": \"f575771d-ce69-4559-870a-35652e94d62a\"}, {\"type\": \"R\", \"condition\": [\"2\"], \"action\": 3, \"closeTicket\": \"O Setor de Tributos da Prefeitura Municipal de Nova Trento agradece seu contato!\", \"nextStepId\": null}], \"actions\": []}, {\"id\": \"f575771d-ce69-4559-870a-35652e94d62a\", \"name\": \"Menu Principal\", \"type\": \"node\", \"left\": \"289px\", \"top\": \"295px\", \"state\": \"success\", \"actions\": [], \"conditions\": [{\"type\": \"R\", \"condition\": [\"1\"], \"action\": 0, \"nextStepId\": \"c4b087ab-f29b-4d8a-9083-b216573a3fab\"}, {\"type\": \"R\", \"condition\": [\"2\"], \"action\": 0, \"nextStepId\": \"578cc5b9-e1c0-4313-9421-7a4657282460\"}, {\"type\": \"R\", \"condition\": [\"3\"], \"action\": 0, \"nextStepId\": \"9cd48b5d-337e-4ac6-a16b-abbb0c4effd3\"}, {\"type\": \"R\", \"condition\": [\"4\"], \"action\": 0, \"nextStepId\": \"a463bd3b-3ba8-46b6-9b12-bcdc866d6849\"}, {\"type\": \"R\", \"condition\": [\"5\"], \"action\": 0, \"nextStepId\": \"e7b88b7b-aa39-4fb6-bfa5-979f3f485024\"}, {\"type\": \"R\", \"condition\": [\"6\"], \"action\": 0, \"nextStepId\": \"6973f594-2a13-4b58-a5cb-dc6bf888dd8e\"}, {\"type\": \"R\", \"condition\": [\"7\"], \"action\": 0, \"nextStepId\": \"282224de-0994-48af-922b-c118a6129a93\"}, {\"type\": \"R\", \"condition\": [\"8\"], \"action\": 0, \"nextStepId\": \"7eacd3ae-f0f3-4fee-8ed7-01e85abb745d\"}], \"interactions\": [{\"type\": \"MessageField\", \"data\": {\"message\": \"*Digite apenas o número correspondente à opção desejada*:\\n\\n1 - Imobiliário (IPTU)\\n2 - ISS (Serviços)\\n3 - Parcelamento e Débitos\\n4 - Certidões e Situação Fiscal\\n5 - Taxas e NFS-e\\n6 - Encaminhamentos para Outros Setores\\n7 - Outras informações\\n8 - Cidadão Web\"}}]}, {\"id\": \"c4b087ab-f29b-4d8a-9083-b216573a3fab\", \"name\": \"1 - Imobiliário (IPTU)\", \"type\": \"node\", \"left\": \"605px\", \"top\": \"91px\", \"state\": \"success\", \"actions\": [], \"conditions\": [{\"type\": \"R\", \"condition\": [\"1\"], \"action\": 3, \"closeTicket\": \"Prezado contribuinte!\\n\\nPara informações sobre emissão de boleto de IPTU, segunda via ou demais informações, acesse o link abaixo:\\n\\nhttps://e-gov.betha.com.br/cdweb/03114-502/contribuinte/rel_guiaiptu.faces\"}, {\"type\": \"R\", \"condition\": [\"2\"], \"action\": 3, \"closeTicket\": \"Prezado Contribuinte, verifique as opções abaixo:\\n\\n- Solicitar serviço (abrir protocolo): https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==\\nAssunto: Atualização cadastral – IPTU.\\n\\n- Documentos típicos: requerimento; matrícula/contrato; documento do proprietário; para obra, ART/CREA.\\n\\n*Quem usa: proprietário ou representante*.\"}, {\"type\": \"R\", \"condition\": [\"3\"], \"action\": 3, \"closeTicket\": \"Prezado contribuinte!\\n\\n- Para informações sobre Regularização fundiária (REURB) → Protocolo on-line, Cadastro multifamiliar / desmembramento → Engenharia/Urbanismo via Protocolo on-line acesse o link: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==\\n\\n- Para Carta de Serviços: https://novatrento.sc.gov.br/cartaservicos/detalhe-abertura-e-consulta-de-processos-protocolo/\"}, {\"type\": \"R\", \"condition\": [\"4\"], \"action\": 0, \"nextStepId\": \"f575771d-ce69-4559-870a-35652e94d62a\"}], \"interactions\": [{\"type\": \"MessageField\", \"data\": {\"message\": \"*Digite apenas o número correspondente à opção desejada*:\\n\\n1 - Guias IPTU \\n2 - Alteração de dados do imóvel\\n3 - Outras Informações\\n4 - Retornar ao Menu Inicial\"}}]}, {\"id\": \"282224de-0994-48af-922b-c118a6129a93\", \"name\": \"7 - Outras informações\", \"type\": \"node\", \"left\": \"617px\", \"top\": \"492px\", \"state\": \"success\", \"actions\": [], \"conditions\": [{\"type\": \"R\", \"condition\": [\"0\"], \"action\": 0, \"nextStepId\": \"f575771d-ce69-4559-870a-35652e94d62a\"}], \"interactions\": [{\"type\": \"MessageField\", \"data\": {\"message\": \"Prezado contribuinte!\\n\\n1.⁠ ⁠Verifique se a opção desejada não está inserida no Menu Principal, *digite 0* para retornar\\n2.⁠ ⁠Caso não tenha encontrado o que deseja, digite um breve relato do que deseja e qual o setor\"}}]}, {\"id\": \"6973f594-2a13-4b58-a5cb-dc6bf888dd8e\", \"name\": \"6 - Encaminhamentos para Outros Setores\", \"type\": \"node\", \"left\": \"612px\", \"top\": \"425px\", \"state\": \"success\", \"actions\": [], \"conditions\": [{\"type\": \"R\", \"condition\": [\"0\"], \"action\": 0, \"nextStepId\": \"f575771d-ce69-4559-870a-35652e94d62a\"}], \"interactions\": [{\"type\": \"MessageField\", \"data\": {\"message\": \"Prezado Contribuinte!\\n\\nVerifique a opção desejada abaixo:\\n\\n•⁠  ⁠Iluminação pública (lâmpadas queimadas) → ZAPLuz (WhatsApp) (48) 99114-9227\\n\\n•⁠  ⁠Coleta seletiva → Formulário on-line: https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZYigaF_BtOjHg==\\n\\n•⁠  ⁠Regularização de imóveis / planta / habite-se → Protocolo on-line: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==\"}}, {\"type\": \"MessageField\", \"data\": {\"message\": \"•⁠  ⁠Abertura de empresa / situação do MEI → Sala do Empreendedor. Telefone/WhatsApp: (48) 3267-3289\\nE-mail: saladoempreendedor@novatrento.sc.gov.br\\nPágina: https://novatrento.sc.gov.br/estrutura-sala-do-empreendedor-nova-trento/\\n\\n•⁠  ⁠Reclamação, sugestão ou denúncia → Ouvidoria Municipal. Telefone (48) 3267-3288; on-line https://novatrento.sc.gov.br/ouvidoria/\"}}, {\"type\": \"MessageField\", \"data\": {\"message\": \"•⁠  ⁠Cadastro social / vulnerabilidade → Assistência Social/CRAS. Telefone (48) 3267-3219; e-mail assistencia@novatrento.sc.gov.br\\n\\n•⁠  ⁠Informações sobre concursos e editais → RH/ Administração. Página https://novatrento.sc.gov.br/concursos-publicos/\\n\\n•⁠  ⁠Saúde pública (consultas, farmácia, vacinas) → Secretaria de Saúde (central) (48) 3267-3267; contatos por UBS: https://novatrento.sc.gov.br/contatos-e-enderecos/\"}}, {\"type\": \"MessageField\", \"data\": {\"message\": \"Para voltar ao Menu Principal, *digite 0*.\"}}]}, {\"id\": \"e7b88b7b-aa39-4fb6-bfa5-979f3f485024\", \"name\": \"5 - Taxas e NFS-e\", \"type\": \"node\", \"left\": \"606px\", \"top\": \"364px\", \"state\": \"success\", \"actions\": [], \"conditions\": [{\"type\": \"R\", \"condition\": [\"1\"], \"action\": 3, \"closeTicket\": \"Prezado Contribuinte, verifique as opções abaixo:\\n\\n- Para ITBI Web (geral): https://e-gov.betha.com.br/cdweb/resource.faces?params=Q8fqfCjC-K6E630iye82fQ==\\n\\n- Para ITBI Web (urbano): https://e-gov.betha.com.br/cdweb/resource.faces?params=Q8fqfCjC-K6htKcYGxtWdA==\\n\\n- Para Certidão de ITBI: https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZT5aW4KbNY7A==\\n\\n*Quem usa*: comprador, vendedor ou representante.\"}, {\"type\": \"R\", \"condition\": [\"2\"], \"action\": 3, \"closeTicket\": \"Prezado Contribuinte, verifique as opções abaixo:\\n\\n- Para Guia de Alvará (taxa): https://e-gov.betha.com.br/cdweb/resource.faces?params=dajCNjbcYywG4YtH7JjF2g==\\n\\nLicenças quando cabível:\\n\\n- Para Vigilância Sanitária: https://e-gov.betha.com.br/cdweb/resource.faces?params=zugXWq4rDkZJAllLv-xK1g==\\n\\n- Para Localização/Funcionamento: https://e-gov.betha.com.br/cdweb/resource.faces?params=zugXWq4rDkbhFXJgJeCIrw==\\n\\n- Para Corpo de Bombeiros: https://e-gov.betha.com.br/cdweb/resource.faces?params=zugXWq4rDkZrAcFRb1ccug==\\n\\n- Para Meio Ambiente: https://e-gov.betha.com.br/cdweb/resource.faces?params=zugXWq4rDkYtBpLoWeeFRA==\\n\\n*Quem usa*: empresa, MEI ou contador.\"}, {\"type\": \"R\", \"condition\": [\"3\"], \"action\": 3, \"closeTicket\": \"Prezado Contribuinte, verifique as opções abaixo:\\n\\n- Dentro do prazo do sistema: cancelar diretamente no e-Nota (NFS-e).\\n\\n- Fora do prazo ou com ISS recolhido: abrir Protocolo on-line (assunto Cancelamento de NFS-e).\\n\\n- Documentos: NFS-e; justificativa assinada; prova do erro (contrato ou e-mail do tomador); NFS-e substituta (se houver).\\n\\n*Quem usa*: emissor da NFS-e.\"}, {\"type\": \"R\", \"condition\": [\"4\"], \"action\": 0, \"nextStepId\": \"f575771d-ce69-4559-870a-35652e94d62a\"}], \"interactions\": [{\"type\": \"MessageField\", \"data\": {\"message\": \"*Digite apenas o número correspondente à opção desejada*:\\n\\n1 - ITBI\\n2 - Alvarás (sanitário e localização)\\n3 - Cancelamento de NFS-e\\n4 - Retornar ao Menu Inicial\"}}]}, {\"id\": \"578cc5b9-e1c0-4313-9421-7a4657282460\", \"name\": \"2 - ISS (Serviços)\", \"type\": \"node\", \"left\": \"602px\", \"top\": \"158px\", \"state\": \"success\", \"actions\": [], \"conditions\": [{\"type\": \"R\", \"condition\": [\"1\"], \"action\": 3, \"closeTicket\": \"Prezado Contribuinte, verifique as opções abaixo:\\n\\n- Para Guias de ISS: https://e-gov.betha.com.br/cdweb/resource.faces?params=dajCNjbcYyxsTHBc5y3dDQ==\\n\\n*Informar nº do alvará, área/padrão e período*.\\n\\n*Quem usa*: responsável técnico (CREA/CAU) ou proprietário com alvará.\\n\\n- Sem alvará: abrir Protocolo on-line (assunto Alvará de Construção / Regularização de Obra): https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==\"}, {\"type\": \"R\", \"condition\": [\"2\"], \"action\": 3, \"closeTicket\": \"Prezado Contribuinte, verifique as opções abaixo:\\n\\n- Para Guias de ISS: https://e-gov.betha.com.br/cdweb/resource.faces?params=dajCNjbcYyxsTHBc5y3dDQ==\\n\\n*Usar inscrição mobiliária ou CPF para emitir a guia corrente*.\\n\\n*Quem usa*: profissional autônomo com inscrição municipal ativa.\"}, {\"type\": \"R\", \"condition\": [\"3\"], \"action\": 3, \"closeTicket\": \"Prezado Contribuinte, verifique as opções abaixo:\\n\\n- Para Guias de ISS: https://e-gov.betha.com.br/cdweb/resource.faces?params=dajCNjbcYyxsTHBc5y3dDQ==\\n\\n*Informar RPS/NFS-e e período; anexar documentos se houver deduções*.\\n\\n*Quem usa*: empresa/MEI e contabilidade (prestador ou tomador).\"}, {\"type\": \"R\", \"condition\": [\"4\"], \"action\": 3, \"closeTicket\": \"Prezado Contribuinte, verifique as opções abaixo:\\n\\n*Verificar enquadramento legal; conferir contrato, NFS-e e eventual declaração do tomador*.\\n\\nEm caso de dúvida, abrir consulta via Protocolo on-line (assunto Consulta Tributária – ISS): https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==\\n\\n*Quem usa*: tomador, responsável fiscal ou contador.\"}, {\"type\": \"R\", \"condition\": [\"5\"], \"action\": 3, \"closeTicket\": \"Prezado Contribuinte, verifique as opções abaixo:\\n\\n- Obra sem alvará → Setor de Obras via Protocolo on-line (assunto Alvará/Regularização de Obra).\\n\\n- MEI irregular ou indevido → Sala do Empreendedor. \\nTelefone/WhatsApp (48) 3267-3289\\nE-mail saladoempreendedor@novatrento.sc.gov.br\\nPágina https://novatrento.sc.gov.br/estrutura-sala-do-empreendedor-nova-trento/\"}, {\"type\": \"R\", \"condition\": [\"6\"], \"action\": 0, \"nextStepId\": \"f575771d-ce69-4559-870a-35652e94d62a\"}], \"interactions\": [{\"type\": \"MessageField\", \"data\": {\"message\": \"*Digite apenas o número correspondente à opção desejada*:\\n\\n1 - ISS Construção civil \\n2 - ISS Fixo (autônomos) \\n3 - ISS Variável\\n4 - Retenção | Substituição Tributária\\n5 - Outras Informações\\n6 - Retornar ao Menu Inicial\"}}]}, {\"id\": \"9cd48b5d-337e-4ac6-a16b-abbb0c4effd3\", \"name\": \"3 - Parcelamento e Débitos\", \"type\": \"node\", \"left\": \"604px\", \"top\": \"224px\", \"state\": \"success\", \"actions\": [], \"conditions\": [{\"type\": \"R\", \"condition\": [\"1\"], \"action\": 3, \"closeTicket\": \"Prezado Contribuinte, verifique as opções abaixo:\\n\\n- Para Verificar a Situação do contribuinte: https://e-gov.betha.com.br/cdweb/resource.faces?params=_HnK5BEHKWX-7ZKW52qVKQ==\\n\\n*Quem usa*: contribuinte por CPF/CNPJ ou por inscrição.\"}, {\"type\": \"R\", \"condition\": [\"2\"], \"action\": 3, \"closeTicket\": \"Prezado Contribuinte, verifique as opções abaixo:\\n\\n- Para Créditos tributários: https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZHYHu8gVmJ5w==\\n\\n*Selecionar débitos; o portal mostra o número máximo de parcelas e o valor mínimo*.\\n\\n*Quem usa*: contribuinte (CPF/CNPJ).\"}, {\"type\": \"R\", \"condition\": [\"3\"], \"action\": 3, \"closeTicket\": \"Prezado Contribuinte, verifique as opções abaixo:\\n\\n- Para Solicitar serviço: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==\\n\\n*Assunto: Parcelamento*.\\n\\n*Quem usa*: contribuinte ou representante.\"}, {\"type\": \"R\", \"condition\": [\"4\"], \"action\": 3, \"closeTicket\": \"Prezado Contribuinte, verifique as opções abaixo:\\n\\n- Reparcelamento; atualização de boletos; cancelamento por inadimplência.\\n\\n- Negociação judicial ou execução → Procuradoria Geral via Protocolo on-line (assunto Negociação Judicial – Tributos).\\n\\n- Protesto de dívida ativa → Procuradoria Fiscal/Jurídico via Protocolo on-line (assunto Protesto – Dívida Ativa).\"}, {\"type\": \"R\", \"condition\": [\"5\"], \"action\": 0, \"nextStepId\": \"f575771d-ce69-4559-870a-35652e94d62a\"}], \"interactions\": [{\"type\": \"MessageField\", \"data\": {\"message\": \"*Digite apenas o número correspondente à opção desejada*:\\n\\n1 - Consulta integrada de débitos (IPTU, ISS, Taxas)\\n2 - Simulação de parcelamento com condições pré-definidas\\n3 - Formalização via protocolo\\n4 - Dúvidas frequentes sobre parcelamento\\n5 - Retornar ao Menu Inicial\"}}]}, {\"id\": \"a463bd3b-3ba8-46b6-9b12-bcdc866d6849\", \"name\": \"4 - Certidões e Situação Fiscal\", \"type\": \"node\", \"left\": \"609px\", \"top\": \"295px\", \"state\": \"success\", \"actions\": [], \"conditions\": [{\"type\": \"R\", \"condition\": [\"1\"], \"action\": 3, \"closeTicket\": \"Prezado Contribuinte, verifique as opções abaixo:\\n\\n- Para CPF/CNPJ: https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbyHHcDK1V21w==\\n\\n- Para Econômico (empresa): https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZv1PWSEd5LZQ==\\n\\n- Para Imóvel (inscrição): https://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbLWCo87X0P1Q==\\n\\n*Quem usa*: contribuinte (PF/PJ).\"}, {\"type\": \"R\", \"condition\": [\"2\"], \"action\": 3, \"closeTicket\": \"Prezado Contribuinte!\\n\\n*CPEN não é emitida on-line* no município. \\n\\nSe necessário, abrir Protocolo e justificar o pedido.\"}, {\"type\": \"R\", \"condition\": [\"3\"], \"action\": 3, \"closeTicket\": \"Prezado contribuinte!\\n\\nPara informações sobre Consulta / atualização cadastral do contribuinte ou demais informações, acesse o link abaixo:\\n\\n- Informações cadastrais (consulta/atualização): https://e-gov.betha.com.br/cdweb/resource.faces?params=I4_rlvksxq4RhutUNw1QjA==\\n\\n- Cadastro de contribuintes: https://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7fCNxNE3Jehpg==\\n\\n*Quem usa*: contribuinte ou contador.\"}, {\"type\": \"R\", \"condition\": [\"4\"], \"action\": 0, \"nextStepId\": \"f575771d-ce69-4559-870a-35652e94d62a\"}], \"interactions\": [{\"type\": \"MessageField\", \"data\": {\"message\": \"*Digite apenas o número correspondente à opção desejada*:\\n\\n1 - Emissão de Certidão Negativa de Débitos (CND)\\n2 - Emissão de Certidão Positiva com Efeitos de Negativa (CPEN)\\n3 - Consulta da situação cadastral do contribuinte\\n4 - Retornar ao Menu Inicial\"}}]}, {\"id\": \"7eacd3ae-f0f3-4fee-8ed7-01e85abb745d\", \"name\": \"8 - Cidadão Web\", \"type\": \"node\", \"left\": \"618px\", \"top\": \"557px\", \"state\": \"success\", \"actions\": [], \"conditions\": [{\"type\": \"R\", \"condition\": [\"0\"], \"action\": 0, \"nextStepId\": \"f575771d-ce69-4559-870a-35652e94d62a\"}], \"interactions\": [{\"type\": \"MessageField\", \"data\": {\"message\": \"Prezado Contribuinte!\\n\\nOs links abaixo poderão ser utilizados para facilitar seu acesso a recursos diretamente do Cidadão Web:\"}}, {\"type\": \"MessageField\", \"data\": {\"message\": \"1\\tAlterar senha\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=liyWcyOMEeOjRuJOfjQlJw==\\n\\n2\\tAlvará de licença da vigilância sanitária\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=zugXWq4rDkZJAllLv-xK1g==\\n\\n3\\tAlvará de licença de localização e/ou funcionamento\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=zugXWq4rDkbhFXJgJeCIrw==\\n\\n4\\tAlvará de licença do Corpo de Bombeiros\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=zugXWq4rDkZrAcFRb1ccug==\\n\\n5\\tAlvará de meio ambiente\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=zugXWq4rDkYtBpLoWeeFRA==\"}}, {\"type\": \"MessageField\", \"data\": {\"message\": \"6\\tCadastro de contribuintes\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7fCNxNE3Jehpg==\\n\\n7\\tCertidão de baixa de atividade\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=UCnNsKYM9XXxWXOp7XAxNw==\\n\\n8\\tCertidão de isenção 2ª via\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZYSaD4Fu4HErA==\\n\\n9\\tCertidão de ITBI\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZT5aW4KbNY7A==\\n\\n10\\tCertidão fiscal venal\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbBrVm4EIEgNA==\"}}, {\"type\": \"MessageField\", \"data\": {\"message\": \"11\\tCertidão negativa de contribuinte\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbyHHcDK1V21w==\\n\\n12\\tCertidão negativa de econômico\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZv1PWSEd5LZQ==\\n\\n13\\tCertidão negativa de imóvel\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbLWCo87X0P1Q==\\n\\n14\\tCréditos tributários\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZZHYHu8gVmJ5w==\\n\\n15\\tDocumentos de processos\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=znPK4Ekv3oB59okccuk4NQ==\"}}, {\"type\": \"MessageField\", \"data\": {\"message\": \"16\\tEmissão de carnê via web\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZbhrxPeIM3jQw==\\n\\n17\\tGuia unificada\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=dajCNjbcYyztyewWmxxY8Q==\\n\\n18\\tGuias de alvará\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=dajCNjbcYywG4YtH7JjF2g==\\n\\n19\\tGuias de IPTU\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=dajCNjbcYyweib-2b3G5IA==\\n\\n20\\tGuias de ISS\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=dajCNjbcYyxsTHBc5y3dDQ==\"}}, {\"type\": \"MessageField\", \"data\": {\"message\": \"20\\tGuias de ISS\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=dajCNjbcYyxsTHBc5y3dDQ==\\n\\n21\\tGuias diversas\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=dajCNjbcYyyurxDAf4HJDw==\\n\\n22\\tInformações cadastrais\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=I4_rlvksxq4RhutUNw1QjA==\\n\\n23\\tITBI Web\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=Q8fqfCjC-K6E630iye82fQ==\\n\\n24\\tITBI web urbano\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=Q8fqfCjC-K6htKcYGxtWdA==\\n\\n25\\tProcessos\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=znPK4Ekv3oBGH_6Hg0tT8Q==\"}}, {\"type\": \"MessageField\", \"data\": {\"message\": \"26\\tPágina inicial\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=Yx4jjQDtH48=\\n\\n27\\tSituação do contribuinte\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=_HnK5BEHKWX-7ZKW52qVKQ==\\n\\n28\\tSituação do referente\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=_HnK5BEHKWVKU_kL_ZLhJw==\\n\\n29\\tSolicitar serviço\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=MHVx5_C9a7cJ50VtitcW8g==\\n30\\tSolicitação de coleta seletiva\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=iLVC-q9x2ZYigaF_BtOjHg==\\n\\n31\\tValidação de documentos\\thttps://e-gov.betha.com.br/cdweb/resource.faces?params=liyWcyOMEeNvFkekCbDSzA==\"}}, {\"type\": \"MessageField\", \"data\": {\"message\": \"Para voltar ao Menu Inicial, digite *0*.\"}}]}]"
+            },
+            {
+              "name": "flow_config",
+              "value": "{\"notOptionsSelectMessage\": {\"message\": \"Não identificamos sua resposta! Por favor digite uma opção válida.\", \"stepReturn\": \"A\"}, \"notResponseMessage\": {\"time\": 10, \"type\": 3, \"destiny\": \"\", \"message\": \"Seu atendimento será encerrado por falta de resposta.\\nAgradecemos seu contato!\"}, \"welcomeMessage\": {\"message\": \"Em breve você será atendido pela nossa equipe!\\n\\nNosso horário de atendimento é de Segunda-Feira à Sexta-Feira das 07h00 às 13h00.\"}, \"farewellMessage\": {\"message\": \"O Setor de Tributos da Prefeitura Municipal de Nova Trento agradece seu contato!\"}, \"maxRetryBotMessage\": {\"number\": 3, \"type\": 3, \"destiny\": \"\"}, \"outOpenHours\": {\"type\": 3, \"destiny\": null}, \"firstInteraction\": {\"type\": 1, \"destiny\": null}, \"keyword\": {\"message\": \"\"}, \"autoDistributeTickets\": \"N\", \"answerCloseTicket\": [\"#sair\", \"#encerrar\"]}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "c20e2b71-f1d8-4bdd-82ca-75c40aed0a85",
+      "name": "Menu Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1840,
+        220
+      ],
+      "parameters": {
+        "language": "javascript",
+        "jsCode": "const flow = { nodeList: JSON.parse($json.flow_nodeList || '[]'), configurations: JSON.parse($json.flow_config || '{}') };\nconst nodesById = {}; for (const n of flow.nodeList) nodesById[n.id] = n;\nconst configs = flow.configurations || {};\nconst welcome = configs.welcomeMessage?.message || '';\nconst farewell = configs.farewellMessage?.message || '';\nconst maxRetry = (configs.maxRetryBotMessage?.number || 3);\nconst invalidMsg = configs.notOptionsSelectMessage?.message || 'Opção inválida.';\nconst closeKeywords = (configs.answerCloseTicket || []).map(s=>s.toLowerCase());\nfunction getMenuPrincipalId(){\n  const n = flow.nodeList.find(x=>x.name && x.name.toLowerCase().includes('menu principal'));\n  return n?.id || 'f575771d-ce69-4559-870a-35652e94d62a';\n}\nfunction renderNodeMessages(node){\n  const msgs = (node?.interactions || [])\n    .filter(i=>i.type==='MessageField')\n    .map(i=>i.data?.message || '')\n    .filter(Boolean);\n  return msgs.join('\\n\\n');\n}\nfunction route(node, input){\n  const conds = (node?.conditions || []).filter(c=>c.type==='R');\n  for (const c of conds){\n    if ((c.condition||[]).some(v => String(v).trim().toLowerCase() === input.toLowerCase())){\n      if (c.action === 3){\n        return { close: true, message: (c.closeTicket || '') };\n      } else if (c.action === 0 && c.nextStepId){\n        return { next: c.nextStepId, message: renderNodeMessages(nodesById[c.nextStepId]) };\n      }\n    }\n  }\n  return { invalid: true };\n}\nconst sd = this.getWorkflowStaticData('global'); sd.menu = sd.menu || {};\nreturn items.map(item => {\n  const chatId = item.json.chat_id;\n  const text = (item.json.message || '').toString().trim();\n  const lower = text.toLowerCase();\n  if (!sd.menu[chatId]){\n    sd.menu[chatId] = { nodeId: 'nodeC', invalid: 0 };\n    const node = nodesById['nodeC'];\n    const out = [welcome, renderNodeMessages(node)].filter(Boolean).join('\\n\\n').trim();\n    item.json.menu = { handled: true, reply: out || renderNodeMessages(node) || welcome || 'Bem-vindo.' };\n    return item;\n  }\n  if (closeKeywords.includes(lower)){\n    const out = farewell || 'Atendimento encerrado. Obrigado pelo contato!';\n    delete sd.menu[chatId];\n    item.json.menu = { handled: true, reply: out };\n    return item;\n  }\n  if (text === '0'){\n    const mid = getMenuPrincipalId();\n    sd.menu[chatId] = { nodeId: mid, invalid: 0 };\n    const node = nodesById[mid];\n    item.json.menu = { handled: true, reply: renderNodeMessages(node) || 'Menu principal.' };\n    return item;\n  }\n  const cur = sd.menu[chatId].nodeId;\n  const node = nodesById[cur] || nodesById[getMenuPrincipalId()];\n  const r = route(node, text);\n  if (r.close){\n    const tail = farewell ? ('\\n\\n' + farewell) : '';\n    delete sd.menu[chatId];\n    item.json.menu = { handled: true, reply: (r.message || '') + tail };\n    return item;\n  }\n  if (r.next){\n    sd.menu[chatId] = { nodeId: r.next, invalid: 0 };\n    item.json.menu = { handled: true, reply: r.message || 'OK.' };\n    return item;\n  }\n  if (r.invalid){\n    sd.menu[chatId].invalid = (sd.menu[chatId].invalid || 0) + 1;\n    if (sd.menu[chatId].invalid >= maxRetry){\n      const out = (configs.notResponseMessage?.message || 'Encerrando por falta de resposta.') + (farewell ? ('\\n\\n' + farewell) : '');\n      delete sd.menu[chatId];\n      item.json.menu = { handled: true, reply: out };\n      return item;\n    } else {\n      const out = invalidMsg + '\\n\\n' + (renderNodeMessages(node) || '');\n      item.json.menu = { handled: true, reply: out };\n      return item;\n    }\n  }\n  item.json.menu = { handled: false };\n  return item;\n});"
+      }
+    },
+    {
+      "id": "2c5fae6e-7e16-42c8-b417-6737aeda4e9e",
+      "name": "Foi tratado pelo Menu?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2100,
+        220
+      ],
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.menu?.handled === true}}",
+              "operation": "isTrue"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "3dc881ff-4710-4625-af7c-216f432ec739",
+      "name": "Enviar Resposta (Menu)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        2360,
+        120
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\"chatId\":\"={{$json.chat_id}}\",\"text\":\"={{$json.menu.reply}}\"}"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "WAHA API"
+        }
+      }
+    },
+    {
+      "id": "a49e3dac-25ee-458c-90dd-66717c6f6c66",
+      "name": "Log Menu",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2600,
+        120
+      ],
+      "parameters": {
+        "language": "javascript",
+        "jsCode": "console.log(JSON.stringify({lvl:'info',evt:'menu_reply',chat_id:$json.chat_id})); return items;"
+      }
+    },
+    {
+      "id": "992fab81-0d8c-47c3-9d9f-83a0197aea95",
+      "name": "Decidir Pré-Handoff",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2100,
+        360
+      ],
+      "parameters": {
+        "language": "javascript",
+        "jsCode": "const mode=$env.HANDOFF_MODE||'auto';\nconst keywordsEnv=($env.HANDOFF_KEYWORDS||'atendente,humano,humana,falar com humano,atendimento humano,reclamação').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);\nconst vips=($env.HANDOFF_VIPS||'').split(',').map(s=>s.trim()).filter(Boolean);\nreturn items.map(item=>{\n  const chatId=item.json.chat_id; const text=(item.json.message||'').toLowerCase();\n  const fromVIP=vips.includes(chatId); const hitKeyword=keywordsEnv.some(k=>k&&text.includes(k)); const strong=text.startsWith('/humano');\n  const forceHuman=item.json.handoff?.forceHuman===true; const preferHuman=item.json.handoff?.preferHuman===true;\n  let pre=false, reason=''; if(forceHuman){pre=true;reason='forced_cmd';}\n  else if(mode==='pre'){pre=(fromVIP||strong||hitKeyword||preferHuman);reason='rule_pre'}\n  else if(mode==='auto'){pre=(fromVIP||strong||preferHuman);reason='rule_auto'}\n  else {pre=false;reason='rule_post'}\n  item.json.handoff=Object.assign({},item.json.handoff,{mode:mode,pre:pre,reason:reason}); return item;\n});"
+      }
+    },
+    {
+      "id": "4c4bbf48-e2a8-40e0-a76b-1cad2e05ef8b",
+      "name": "É Pré-Handoff?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2360,
+        360
+      ],
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.handoff.pre === true}}",
+              "operation": "isTrue"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fbac8c34-5316-4022-b69f-cf3a64a265b6",
+      "name": "Avisar Transferência (Pré)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        2620,
+        260
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\"chatId\":\"={{$json.chat_id}}\",\"text\":\"Certo! Vou te transferir para um atendente humano agora. ✋🙂\"}"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "WAHA API"
+        }
+      }
+    },
+    {
+      "id": "37391c3d-1c60-4812-a804-f6f291c91892",
+      "name": "Log Handoff (Pré)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2860,
+        260
+      ],
+      "parameters": {
+        "language": "javascript",
+        "jsCode": "console.log(JSON.stringify({lvl:'info',evt:'handoff_pre',chat_id:$json.chat_id,reason:$json.handoff?.reason})); return items;"
+      }
+    },
+    {
+      "id": "9e24f34e-65bb-4ff1-84f8-06e1cd85616b",
+      "name": "Iniciar Digitando",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        2620,
+        460
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/startTyping",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\"chatId\":\"={{$json.chat_id}}\"}"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "WAHA API"
+        }
+      }
+    },
+    {
+      "id": "a863af26-8023-4dea-b3b7-465212a0af8e",
+      "name": "Processar na API Python",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        2880,
+        460
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://api:5000/chatbot/webhook/",
+        "jsonParameters": true,
+        "options": {
+          "fullResponse": true,
+          "timeout": 60000
+        },
+        "bodyParametersJson": "={{$json}}"
+      }
+    },
+    {
+      "id": "96a7e084-1889-4767-a64e-5ba41c2a7b69",
+      "name": "Decidir Pós-Handoff",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3140,
+        460
+      ],
+      "parameters": {
+        "language": "javascript",
+        "jsCode": "const mode=$json.handoff?.mode||$env.HANDOFF_MODE||'auto';\nreturn items.map(item=>{\n  const status=item.json.statusCode; let body={};\n  try{body=(typeof item.json.body==='string')?JSON.parse(item.json.body):(item.json.body||{});}catch(e){body=item.json.body||{};}\n  const txt=($item(0,0).json.message||'').toLowerCase();\n  const keywords=($env.HANDOFF_KEYWORDS||'atendente,humano,humana,falar com humano,atendimento humano,reclamação').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);\n  const hit=keywords.some(k=>k && txt.includes(k)); const strong=txt.startsWith('/humano');\n  const low=!!body.low_confidence; const apiH=!!body.handoff;\n  const should=(mode==='post'||mode==='auto')&&(status!==200||low||apiH||strong||hit);\n  item.json.postHandoff={should:should,reason:(status!==200)?'erro_api':(apiH?'api_handoff':(low?'baixa_confiança':(strong?'cmd':(hit?'keyword':'ok'))))};\n  return item;\n});"
+      }
+    },
+    {
+      "id": "143011fa-18cc-4790-80e4-ae3f6b447bc2",
+      "name": "É Pós-Handoff?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        3400,
+        460
+      ],
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.postHandoff?.should === true}}",
+              "operation": "isTrue"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "4a41d679-394d-4d08-9f9c-c0ccf57c9c0a",
+      "name": "Parar Digitando (handoff)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        3660,
+        360
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/stopTyping",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\"chatId\":\"={{$item(0,0).json.chat_id}}\"}"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "WAHA API"
+        }
+      }
+    },
+    {
+      "id": "e06c4a28-45df-4f58-89f1-8cc401166150",
+      "name": "Avisar Transferência (Pós)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        3920,
+        360
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\"chatId\":\"={{$item(0,0).json.chat_id}}\",\"text\":\"Vou te transferir para um atendente humano para te ajudar melhor. 👍\"}"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "WAHA API"
+        }
+      }
+    },
+    {
+      "id": "2558c5cc-a025-4632-abff-ab7de8fdeb32",
+      "name": "Log Handoff (Pós)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4160,
+        360
+      ],
+      "parameters": {
+        "language": "javascript",
+        "jsCode": "console.log(JSON.stringify({lvl:'info',evt:'handoff_post',chat_id:$item(0,0).json.chat_id,reason:$json.postHandoff?.reason})); return items;"
+      }
+    },
+    {
+      "id": "44b43740-89c4-403f-90ba-f1e342663321",
+      "name": "Verificar Resposta",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        3660,
+        560
+      ],
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json.statusCode}}",
+              "operation": "equal",
+              "value2": 200
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "4fea27ce-dc2d-4f85-a426-01ece4e7ddc1",
+      "name": "Parar Digitando (OK)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        3920,
+        500
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/stopTyping",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\"chatId\":\"={{$item(0,0).json.chat_id}}\"}"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "WAHA API"
+        }
+      }
+    },
+    {
+      "id": "66598cd7-4de6-4a3c-9a5e-fd216f61fe7a",
+      "name": "Parar Digitando (Erro)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        3920,
+        640
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/stopTyping",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\"chatId\":\"={{$item(0,0).json.chat_id}}\"}"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "WAHA API"
+        }
+      }
+    },
+    {
+      "id": "538ad2bf-5d90-41fa-873c-cbfcfbfb93aa",
+      "name": "Enviar Mensagem de Erro",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        4180,
+        640
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://waha:3000/api/sendText",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\"chatId\":\"={{$item(0,0).json.chat_id}}\",\"text\":\"Desculpe, houve um erro ao processar sua mensagem. Um atendente humano vai te ajudar em seguida.\"}"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "WAHA API"
+        }
+      }
+    },
+    {
+      "id": "b8883f08-3404-429b-9257-1e027d75e767",
+      "name": "Log Sucesso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4180,
+        500
+      ],
+      "parameters": {
+        "language": "javascript",
+        "jsCode": "console.log(JSON.stringify({lvl:'info',evt:'ok',chat_id:$item(0,0).json.chat_id})); return items;"
+      }
+    }
+  ],
+  "connections": {
+    "WAHA Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Grupos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Grupos": {
+      "main": [
+        [
+          {
+            "node": "Encerrar (Grupos)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extrair Metadados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Metadados": {
+      "main": [
+        [
+          {
+            "node": "Throttle / Anti-spam",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Throttle / Anti-spam": {
+      "main": [
+        [
+          {
+            "node": "Está Throttled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Está Throttled?": {
+      "main": [
+        [
+          {
+            "node": "Avisar Throttle",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Checar Horário Comercial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avisar Throttle": {
+      "main": [
+        [
+          {
+            "node": "Log Throttle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Checar Horário Comercial": {
+      "main": [
+        [
+          {
+            "node": "Router de Comandos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router de Comandos": {
+      "main": [
+        [
+          {
+            "node": "Carregar Fluxo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Carregar Fluxo": {
+      "main": [
+        [
+          {
+            "node": "Menu Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Menu Engine": {
+      "main": [
+        [
+          {
+            "node": "Foi tratado pelo Menu?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Foi tratado pelo Menu?": {
+      "main": [
+        [
+          {
+            "node": "Enviar Resposta (Menu)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Decidir Pré-Handoff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Resposta (Menu)": {
+      "main": [
+        [
+          {
+            "node": "Log Menu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decidir Pré-Handoff": {
+      "main": [
+        [
+          {
+            "node": "É Pré-Handoff?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É Pré-Handoff?": {
+      "main": [
+        [
+          {
+            "node": "Avisar Transferência (Pré)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Iniciar Digitando",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avisar Transferência (Pré)": {
+      "main": [
+        [
+          {
+            "node": "Log Handoff (Pré)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Iniciar Digitando": {
+      "main": [
+        [
+          {
+            "node": "Processar na API Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar na API Python": {
+      "main": [
+        [
+          {
+            "node": "Decidir Pós-Handoff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decidir Pós-Handoff": {
+      "main": [
+        [
+          {
+            "node": "É Pós-Handoff?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É Pós-Handoff?": {
+      "main": [
+        [
+          {
+            "node": "Parar Digitando (handoff)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Verificar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parar Digitando (handoff)": {
+      "main": [
+        [
+          {
+            "node": "Avisar Transferência (Pós)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avisar Transferência (Pós)": {
+      "main": [
+        [
+          {
+            "node": "Log Handoff (Pós)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Parar Digitando (OK)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Parar Digitando (Erro)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parar Digitando (OK)": {
+      "main": [
+        [
+          {
+            "node": "Log Sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parar Digitando (Erro)": {
+      "main": [
+        [
+          {
+            "node": "Enviar Mensagem de Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "America/Sao_Paulo"
+  },
+  "meta": {
+    "templateCredsSetup": true,
+    "instanceId": "71600cee-beef-4b60-a604-10504138d28d"
+  }
+}
