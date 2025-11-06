@@ -1,7 +1,7 @@
 param(
   [string]$WahaUrl = "http://localhost:3000",
   [string]$ApiKey = "tributos_nova_trento_2025_api_key_fixed",
-  [string]$NewWebhookUrl = "http://n8n:5678/webhook/94a8adfc-1dba-41e7-be61-4c13b51fa08e"
+  [string]$NewWebhookUrl = "http://n8n:5678/webhook/8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b/waha"
 )
 
 $headers = @{ 

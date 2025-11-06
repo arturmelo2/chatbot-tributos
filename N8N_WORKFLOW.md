@@ -16,13 +16,9 @@ Observações:
 - O `8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b` é o `webhookId` do nó WAHA Trigger dentro do n8n. Se criar outro nó, use o novo `webhookId`.
 - O n8n está exposto em `http://localhost:5679` para interface Web.
 
-## 2) Importar o workflow pronto
+## 2) Workflow pronto
 
-Importe no n8n o arquivo:
-
-```
-./n8n/workflows/waha_to_api_8c0ac011.json
-```
+O `docker compose up -d` executa o bootstrap automático que instala `n8n-nodes-waha` e ativa o arquivo `./n8n/workflows/waha_to_api_8c0ac011.json`.
 
 Ele contém três nós:
 - **WAHA Trigger**: recebe eventos do WAHA
@@ -32,7 +28,7 @@ Ele contém três nós:
   - Content-Type: application/json
   - JSON/RAW Body: `{{$json}}`
 
-Ative o workflow (botão **Activate**), para registrar o webhook de produção do n8n. Desative workflows antigos que usem o nó Webhook genérico para evitar conflito.
+O workflow já sobe **Active**. Se importar outra variação, lembre-se de ativá-la e desativar versões antigas para evitar conflitos.
 
 ## 3) Testar ponta a ponta
 

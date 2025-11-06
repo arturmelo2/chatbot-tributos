@@ -4,31 +4,31 @@
 
 ---
 
-## 🚀 Passo 1: Acessar n8n
+## 🚀 Passo 1: Subir os containers
 
-1. Abrir: http://localhost:5679
-2. Criar conta (primeiro acesso) e logar
+Execute `docker compose up -d` na raiz do projeto. O serviço `n8n-bootstrap` roda uma única vez para:
 
----
+- Criar a base de dados do n8n;
+- Importar e ativar automaticamente o workflow `WAHA → API (mensagens)`;
+- Garantir que o webhookId padrão (`8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b`) esteja ativo.
 
-## 📋 Passo 2: Importar o workflow pronto (recomendado)
-
-1. Menu → Import from File
-2. Selecione: `./n8n/workflows/waha_to_api_8c0ac011.json`
-3. Abra o nó “WAHA Trigger” e confirme o `webhookId`.
-4. Ative o workflow (botão Activate).
-
-Resultado esperado: O n8n mostra a URL de produção do webhook no formato:
-
-```
-http://n8n:5678/webhook/8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b/waha
-``
+Quando o bootstrap já tiver sido executado anteriormente, o container termina imediatamente e não reimporta nada.
 
 ---
 
-## 🔗 Passo 3: Apontar o WAHA para o WAHA Trigger (n8n)
+## 📋 Passo 2: Verificar o n8n
 
-Já deixamos o `compose.yml` com a variável correta no serviço `waha`:
+1. Abra http://localhost:5679.
+2. Como o `N8N_USER_MANAGEMENT_DISABLED` está habilitado, você acessa diretamente o painel sem precisar criar usuário. (Em produção, reative o controle de acesso definindo `N8N_USER_MANAGEMENT_DISABLED=false` e criando um usuário proprietário.)
+3. O workflow **WAHA → API (mensagens) [8c0ac011]** já aparece como **Active**.
+
+Se precisar editar o fluxo, basta duplicá-lo ou salvar com outro nome. O arquivo original continua disponível em `./n8n/workflows/waha_to_api_8c0ac011.json`.
+
+---
+
+## 🔗 Passo 3: Conferir o webhook do WAHA
+
+O `compose.yml` já injeta a URL correta no serviço `waha`:
 
 ```yaml
 environment:
@@ -36,20 +36,19 @@ environment:
   - WHATSAPP_HOOK_EVENTS=message,session.status
 ```
 
-Se você editar o webhookId no n8n, atualize a URL acima no `compose.yml` e recrie os containers.
+Se você decidir gerar um novo `webhookId`, atualize essa variável e recrie os containers com `docker compose up -d` para aplicar.
 
 ---
 
-## 🔁 Passo 4: Encaminhar para a API
+## 🔁 Passo 4: Fluxo até a API
 
-O workflow importado já contém o nó HTTP Request configurado para enviar o JSON integral do evento para a API:
+O workflow automático envia todo o payload recebido do WAHA diretamente para a API `chatbot/webhook/`:
 
 - Método: POST
 - URL: `http://api:5000/chatbot/webhook/`
-- JSON/RAW Parameters: ON
-- JSON/RAW Body: `{{$json}}`
+- Corpo JSON: `{{$json}}`
 
-Observação: Não use nós de “Send Text” no n8n; a API (`app.py`) envia as respostas e controla o typing.
+O processamento de resposta continua centralizado na API (`app.py`), evitando duplicidade de lógica no n8n.
 
 ---
 
@@ -72,7 +71,7 @@ Observação: Não use nós de “Send Text” no n8n; a API (`app.py`) envia as
 ## ✅ Checklist Final
 
 - [ ] n8n rodando (http://localhost:5679)
-- [ ] Workflow importado e ATIVO
+- [ ] Workflow importado e ATIVO (verificar sem login)
 - [ ] WAHA configurado com a URL do WAHA Trigger (UUID correto)
 - [ ] Execução aparecendo no n8n
 - [ ] Bot respondendo pelo WhatsApp

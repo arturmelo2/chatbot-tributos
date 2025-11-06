@@ -102,11 +102,13 @@ Resultados esperados: ✓ API OK, ✓ WAHA OK, ✓ n8n OK
 
 ## 🔄 6. Importar workflow n8n
 
-1. Acesse no servidor: **http://localhost:5679**
-2. Crie conta (primeira vez)
-3. Clique em **Workflows** → **Import from File**
-4. Selecione: `n8n/workflows/chatbot_orquestracao_plus_menu.json`
-5. Ative o workflow (toggle ON)
+> ✅ **Automático**: ao executar `docker compose up -d`, o serviço `n8n-bootstrap` instala o community node `n8n-nodes-waha` e deixa o workflow **WAHA → API (mensagens)** ativo.
+
+Para customizações:
+
+1. Acesse **http://localhost:5679** (sem login obrigatório).
+2. Duplique o fluxo existente ou importe outro arquivo via **Workflows → Import from File**.
+3. Ajuste credenciais apenas se estiver usando outra API Key ou webhook.
 
 ---
 

@@ -60,16 +60,10 @@ docker compose ps
 
 ### 3. Configurar n8n
 
-Acesse: http://localhost:5679
+Acesse: http://localhost:5679 (login desativado por padrão).
 
-**Primeira Execução:**
-1. Criar conta de administrador
-2. Definir email e senha
-
-**Instalar Community Nodes:**
-- Settings → Community Nodes → Install
-- Instalar: `n8n-nodes-waha`
-- Reiniciar n8n: `docker restart tributos_n8n`
+- O community node `n8n-nodes-waha` é instalado automaticamente pelo `n8n-bootstrap` na primeira subida.
+- Caso deseje reforçar segurança em produção, reative o login definindo `N8N_USER_MANAGEMENT_DISABLED=false` no `compose` e crie um usuário administrador.
 
 ### 4. Configurar Credenciais n8n
 
@@ -83,6 +77,8 @@ Acesse: http://localhost:5679
 ---
 
 ## 📋 Importar Workflow
+
+> ℹ️ O `docker compose up -d` já importa e ativa automaticamente o fluxo **WAHA → API (mensagens)** com o community node `n8n-nodes-waha`. Use os passos abaixo apenas se quiser substituir por outra variação.
 
 ### Workflow Principal: `chatbot_completo_orquestracao.json`
 

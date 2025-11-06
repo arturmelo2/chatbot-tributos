@@ -57,32 +57,15 @@ Após iniciar, acesse:
 
 ---
 
-## ⚙️ Configurar n8n (5 minutos)
+## ⚙️ Configurar n8n (2 minutos)
 
-1. **Acessar:** http://localhost:5679
+1. **Subir os containers:** `docker compose up -d`
 
-2. **Criar conta** (primeira vez)
+2. **Acessar o painel:** http://localhost:5679 (não é preciso criar conta, o login está desativado para acelerar o setup).
 
-3. **Instalar community node:**
-   - Settings → Community Nodes
-   - Instalar: `n8n-nodes-waha`
-   - Restart n8n (automático)
+3. **Verificar workflow:** o fluxo **WAHA → API (mensagens) [8c0ac011]** já aparece instalado, com community node `n8n-nodes-waha` ativo e status **Active**.
 
-4. **Importar workflow:**
-   - Menu → Import from File
-   - Arquivo: `n8n/workflows/chatbot_completo_orquestracao.json`
-
-5. **Configurar credencial WAHA:**
-   - No workflow, clicar no nó WAHA
-   - Credential: Create New
-   - Type: Header Auth
-   - Header Name: `X-Api-Key`
-   - Header Value: `tributos_nova_trento_2025_api_key_fixed`
-   - Salvar
-
-6. **Ativar workflow:**
-   - Toggle no topo: OFF → ON
-   - Deve ficar verde ✅
+4. **Credenciais WAHA:** o nó já usa a credencial de API Key (`tributos_nova_trento_2025_api_key_fixed`). Ajuste apenas se trocar a chave padrão.
 
 ---
 

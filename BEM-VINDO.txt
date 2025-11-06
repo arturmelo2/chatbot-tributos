@@ -72,17 +72,15 @@
 
    n8n (Automação):
    🔗 http://localhost:5679
-   👤 Criar conta no primeiro acesso
+   ✅ Acesso direto (login desativado no dev)
 
 
 🎯 DEPOIS DO DEPLOY:
 ═══════════════════════════════════════════════════════════════════════════
 
    1️⃣  Configurar n8n (http://localhost:5679)
-      - Criar conta
-      - Instalar n8n-nodes-waha
-      - Importar workflow
-      - Ativar
+      - Workflow "WAHA → API (mensagens)" já ativo
+      - Edite apenas se precisar de customizações
 
    2️⃣  Conectar WhatsApp (http://localhost:3000)
       - Login com credenciais acima

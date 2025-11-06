@@ -37,13 +37,10 @@ cp .env.example .env
 # 3. Carregar base de conhecimento
 ./scripts/load-knowledge.ps1
 
-# 4. Configurar n8n
+# 4. Conferir n8n
 # - Acesse http://localhost:5679
-# - Crie conta
-# - Instale community node: n8n-nodes-waha
-# - Importe workflow: n8n/workflows/chatbot_completo_orquestracao.json
-# - Configure credencial WAHA (Header Auth)
-# - Ative o workflow
+# - O workflow "WAHA → API (mensagens)" já vem ativo
+# - Edite apenas se precisar customizar o fluxo padrão
 
 # 5. Conectar WhatsApp
 ./scripts/start-waha-session.ps1

@@ -38,7 +38,8 @@
 
 ### n8n
 - 🔗 **URL:** http://localhost:5679
-- 👤 **Criar conta no primeiro acesso**
+- ✅ **Acesso direto (login desativado por padrão)**
+- 🔒 Para habilitar autenticação em produção, defina `N8N_USER_MANAGEMENT_DISABLED=false` e crie um usuário proprietário.
 
 ---
 
@@ -181,13 +182,14 @@ rag/data/
 
 ### Importar no n8n
 
-1. Acessar http://localhost:5679
-2. Menu → Import from File
-3. Selecionar: `n8n/workflows/chatbot_completo_orquestracao.json`
-4. Configurar credencial WAHA (Header Auth):
-   - Name: `X-Api-Key`
-   - Value: `tributos_nova_trento_2025_api_key_fixed`
-5. Ativar workflow (toggle verde)
+> ✅ **Automático**: o `docker compose up -d` executa o serviço `n8n-bootstrap`, que instala o community node `n8n-nodes-waha` e ativa o workflow padrão automaticamente.
+
+Caso queira usar outro fluxo:
+
+1. Acesse http://localhost:5679 (login desativado para agilizar).
+2. Menu → Import from File.
+3. Selecione o arquivo desejado (ex.: `n8n/workflows/chatbot_completo_orquestracao.json`).
+4. Ajuste credenciais e salve com outro nome para não sobrescrever o fluxo padrão.
 
 ---
 
@@ -351,7 +353,7 @@ docker-compose exec api python rag/load_knowledge.py --clear
 1. Verificar se workflow está ATIVO (toggle verde)
 2. Verificar webhook URL no WAHA:
    ```
-   http://n8n:5678/webhook/94a8adfc-1dba-41e7-be61-4c13b51fa08e
+   http://n8n:5678/webhook/8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b/waha
    ```
 3. Verificar credencial WAHA no n8n
 4. Testar webhook manualmente:

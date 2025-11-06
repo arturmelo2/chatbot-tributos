@@ -256,20 +256,19 @@ Validação rápida dos endpoints (opcional):
 
 ### 4. Configuração do n8n
 
+O serviço `n8n-bootstrap` roda automaticamente na primeira subida e cuida de:
+
+- Instalar o community node `n8n-nodes-waha`;
+- Importar e ativar o workflow `WAHA → API (mensagens)` com a credencial WAHA configurada.
+
+Se quiser customizar:
+
 ```bash
 # Acessar n8n
 http://seu-servidor:5679
 
-# Criar conta administrativa
-# Importar workflow de: n8n/workflows/chatbot_completo_orquestracao.json
-
-# Criar credencial WAHA
-# - Tipo: HTTP Header Auth
-# - Nome: WAHA API
-# - Header: X-Api-Key
-# - Value: tributos_nova_trento_2025_api_key_fixed
-
-# Ativar workflow
+# Duplicar ou importar novo workflow (Workflows → Import from File)
+# Ajustar credenciais conforme necessário
 ```
 
 ### 5. Conectar WhatsApp

@@ -23,6 +23,21 @@ services:
       retries: 3
       start_period: 40s
 
+  n8n-bootstrap:
+    image: n8nio/n8n:latest
+    container_name: tributos_n8n_bootstrap
+    restart: "no"
+    entrypoint: ["/bin/sh", "/bootstrap/n8n-bootstrap.sh"]
+    user: "root"
+    environment:
+      - N8N_BOOTSTRAP_WORKFLOW=/bootstrap/workflows/waha_to_api_8c0ac011.json
+      - N8N_BOOTSTRAP_MARKER=.bootstrap_done
+      - N8N_USER_FOLDER=/home/node/.n8n
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./deploy/bootstrap/n8n-bootstrap.sh:/bootstrap/n8n-bootstrap.sh:ro
+      - ./n8n/workflows:/bootstrap/workflows:ro
+
   n8n:
     image: n8nio/n8n:latest
     container_name: tributos_n8n
@@ -35,12 +50,16 @@ services:
       - N8N_PROTOCOL=http
       - WEBHOOK_URL=http://n8n:5678/
       - GENERIC_TIMEZONE=America/Sao_Paulo
+      - N8N_USER_MANAGEMENT_DISABLED=true
+      - N8N_DIAGNOSTICS_ENABLED=false
       - GROQ_API_KEY=${GROQ_API_KEY:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - NODE_OPTIONS=--max-old-space-size=2048
     volumes:
       - n8n_data:/home/node/.n8n
-      - ./n8n/workflows:/home/node/.n8n/workflows:ro
+    depends_on:
+      n8n-bootstrap:
+        condition: service_completed_successfully
     networks:
       - tributos_network
     healthcheck:
