@@ -20,6 +20,8 @@ import re
 import sys
 from typing import Iterator, List, Optional, cast
 
+from langchain_community.vectorstores.utils import filter_complex_metadata
+
 # Adiciona o diretório raiz ao path para importar módulos
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -79,7 +81,8 @@ def parse_html_law(file_path: str) -> Document:
                 
                 mapped_key = key_map.get(key, key)
                 if mapped_key in ["tags"]:
-                    metadata[mapped_key] = [tag.strip() for tag in value.split(";")]
+                    # ChromaDB não aceita listas em metadata - converter para string
+                    metadata[mapped_key] = ", ".join([tag.strip() for tag in value.split(";")])
                 else:
                     metadata[mapped_key] = value
     
@@ -110,8 +113,9 @@ def parse_html_law(file_path: str) -> Document:
         content_parts.append(f"**Situação**: {metadata.get('status')}")
     if metadata.get("subject"):
         content_parts.append(f"**Assunto**: {metadata.get('subject')}")
-    if metadata.get("tags") and isinstance(metadata.get("tags"), list):
-        content_parts.append(f"**Tags**: {', '.join(metadata.get('tags', []))}")
+    if metadata.get("tags"):
+        tags_str = metadata.get("tags") if isinstance(metadata.get("tags"), str) else ", ".join(metadata.get("tags", []))
+        content_parts.append(f"**Tags**: {tags_str}")
     
     # Extract main content (skip navigation and footer)
     for container in soup.find_all("div", class_="container"):
@@ -352,6 +356,10 @@ def load_knowledge(
     print("\n✂️  Dividindo documentos em chunks...")
     chunks = split_documents(docs, chunk_size, chunk_overlap)
     print(f"   ✅ {len(chunks)} chunk(s) criado(s)")
+
+    # Filtrar metadados complexos (listas, dicts, etc) que ChromaDB não aceita
+    print("\n🔧 Filtrando metadados complexos...")
+    chunks = filter_complex_metadata(chunks)
 
     # Adicionar ao Chroma
     print("\n💾 Adicionando chunks ao Chroma...")
