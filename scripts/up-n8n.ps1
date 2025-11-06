@@ -69,7 +69,7 @@ Write-Host "     └─ Usuário: admin" -ForegroundColor Gray
 Write-Host "     └─ Senha: Tributos@NovaTrento2025" -ForegroundColor Gray
 Write-Host ""
 Write-Host "   • n8n Workflows: http://localhost:5679" -ForegroundColor White
-Write-Host "     └─ Configure credenciais na primeira execução" -ForegroundColor Gray
+Write-Host "     └─ Workflow padrão já ativo (login desabilitado)" -ForegroundColor Gray
 Write-Host ""
 Write-Host "   • API Python: http://localhost:5000" -ForegroundColor White
 Write-Host "     └─ Health: http://localhost:5000/health" -ForegroundColor Gray
@@ -80,11 +80,8 @@ Write-Host "   1. Carregar base de conhecimento:" -ForegroundColor White
 Write-Host "      ./scripts/load-knowledge.ps1" -ForegroundColor Gray
 Write-Host ""
 Write-Host "   2. Acesse n8n: http://localhost:5679" -ForegroundColor White
-Write-Host "      • Crie conta (primeiro acesso)" -ForegroundColor Gray
-Write-Host "      • Instale community node: n8n-nodes-waha" -ForegroundColor Gray
-Write-Host "      • Importe: n8n/workflows/chatbot_completo_orquestracao.json" -ForegroundColor Gray
-Write-Host "      • Configure credencial WAHA (Header Auth)" -ForegroundColor Gray
-Write-Host "      • Ative o workflow" -ForegroundColor Gray
+Write-Host "      • Confirme workflow \"WAHA → API (mensagens)\" ativo" -ForegroundColor Gray
+Write-Host "      • Edite apenas se quiser customizar" -ForegroundColor Gray
 Write-Host ""
 Write-Host "   3. Conectar WhatsApp no WAHA:" -ForegroundColor White
 Write-Host "      ./scripts/start-waha-session.ps1" -ForegroundColor Gray

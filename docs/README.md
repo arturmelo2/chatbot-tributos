@@ -22,10 +22,9 @@ Esta pasta contém documentação detalhada e guias específicos para diferentes
 ### 🔄 n8n (Workflow Automation)
 
 - **[CONFIGURAR_N8N.md](CONFIGURAR_N8N.md)** - Configuração completa do n8n
-  - Instalação
-  - Criação de conta
-  - Importação de workflows
-  - Configuração de credenciais
+  - Bootstrap automático do workflow
+  - Ajustes do webhook WAHA
+  - Checklist de testes
 
 - **[N8N_WORKFLOW.md](N8N_WORKFLOW.md)** - Detalhes dos workflows
   - Estrutura dos workflows
@@ -38,6 +37,7 @@ Esta pasta contém documentação detalhada e guias específicos para diferentes
   - Horário comercial
   - Handoff humano
   - Engine de menus
+
 
 ### 📱 WhatsApp & WAHA
 

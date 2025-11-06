@@ -177,11 +177,8 @@ Write-Host @"
 
    1️⃣  Configurar n8n:
       - Acessar: http://localhost:5679
-      - Criar conta
-      - Instalar community node: n8n-nodes-waha
-      - Importar workflow: n8n/workflows/chatbot_completo_orquestracao.json
-      - Configurar credencial WAHA (API Key)
-      - Ativar workflow
+      - Workflow "WAHA → API (mensagens)" já ativo
+      - Edite apenas se quiser customizar o fluxo
 
    2️⃣  Conectar WhatsApp:
       - Acessar: http://localhost:3000

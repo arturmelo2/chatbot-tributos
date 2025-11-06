@@ -52,37 +52,19 @@ docker-compose exec api python rag/load_knowledge.py
 
 ### Passo 4️⃣ - Configurar n8n
 
+> ✅ **Automação pronta:** o serviço `n8n-bootstrap` executado pelo `docker compose up -d` instala o community node `n8n-nodes-waha`, importa o workflow `WAHA → API (mensagens)` e ativa o webhook com a credencial WAHA padrão.
+
+Para ajustes finos:
+
 1. **Acessar n8n:**
    ```
    http://localhost:5679
    ```
 
-2. **Primeira vez:**
-   - Criar conta de usuário
-   - Email: admin@novatrento.sc.gov.br
-   - Senha: (sua escolha - ANOTE!)
-
-3. **Instalar community node:**
-   - Settings → Community Nodes
-   - Instalar: `n8n-nodes-waha`
-
-4. **Importar workflow:**
-   - Import → Selecionar arquivo:
-     ```
-     n8n/workflows/chatbot_completo_orquestracao.json
-     ```
-
-5. **Configurar credencial WAHA:**
-   - Credentials → Add Credential → Header Auth
-   - Nome: `WAHA API`
-   - Name: `X-Api-Key`
-   - Value: `tributos_nova_trento_2025_api_key_fixed`
-   - Salvar
-
-6. **Ativar workflow:**
-   - Abrir workflow importado
-   - Clicar em "Active" (toggle no canto superior direito)
-   - ✅ Workflow deve ficar verde
+2. **Editar conforme necessário:**
+   - Duplique o workflow padrão antes de alterar.
+   - Ajuste credenciais apenas se trocar a API Key do WAHA.
+   - Lembre-se de deixar apenas um fluxo **Active** por webhook.
 
 ### Passo 5️⃣ - Conectar WhatsApp
 
@@ -231,7 +213,7 @@ docker-compose exec api python rag/load_knowledge.py --clear
 1. Verificar se workflow está ativo (toggle verde)
 2. Verificar webhook URL no WAHA:
    ```
-   http://n8n:5678/webhook/94a8adfc-1dba-41e7-be61-4c13b51fa08e
+  http://n8n:5678/webhook/8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b/waha
    ```
 3. Verificar credencial WAHA no n8n
 4. Ver logs: `docker-compose logs -f n8n`

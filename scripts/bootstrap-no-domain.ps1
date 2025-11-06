@@ -25,7 +25,7 @@ Write-Host "1) Conectar WAHA (uma vez) no servidor:" -ForegroundColor White
 Write-Host "   - Abra no navegador do servidor: http://localhost:3000" -ForegroundColor Gray
 Write-Host "   - Login: admin / Tributos@NovaTrento2025" -ForegroundColor Gray
 Write-Host "   - Clique em 'Start Session' e escaneie o QR com o WhatsApp" -ForegroundColor Gray
-Write-Host "2) Importar workflow no n8n: http://localhost:5679 (Workflows → Import from file)" -ForegroundColor White
+Write-Host "2) Conferir n8n: http://localhost:5679 (workflow padrão já ativo)" -ForegroundColor White
 Write-Host "3) Testar enviando mensagem para o número conectado." -ForegroundColor White
 
 if ($AutoStart) {

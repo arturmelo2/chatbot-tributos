@@ -46,7 +46,8 @@ O repositório **Chatbot de Tributos** está **100% pronto para uso em produçã
 
 ### n8n (Automação)
 - ✅ **URL:** http://localhost:5679
-- ✅ **Criar conta no primeiro acesso**
+- ✅ **Acesso direto (login desativado no dev)**
+- 🔒 Para produção, defina `N8N_USER_MANAGEMENT_DISABLED=false` e crie usuário.
 
 ---
 
@@ -100,13 +101,10 @@ Seguir o guia: [START-HERE.md](START-HERE.md)
 .\QUICK-START.ps1
 ```
 
-### 2️⃣ Configurar n8n (5 min)
+### 2️⃣ Configurar n8n (2 min)
 1. Acessar http://localhost:5679
-2. Criar conta
-3. Instalar `n8n-nodes-waha`
-4. Importar workflow
-5. Configurar credencial WAHA
-6. Ativar workflow
+2. Confirmar workflow **WAHA → API (mensagens)** ativo (instalado automaticamente)
+3. Editar apenas se precisar customizar / duplicar fluxos
 
 ### 3️⃣ Conectar WhatsApp (2 min)
 ```powershell

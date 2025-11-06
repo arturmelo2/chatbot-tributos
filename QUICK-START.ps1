@@ -88,11 +88,8 @@ Write-Host @"
 ║  Próximos passos:                                                          ║
 ║                                                                            ║
 ║  1️⃣  n8n (http://localhost:5679)                                          ║
-║     - Criar conta                                                          ║
-║     - Instalar: n8n-nodes-waha                                            ║
-║     - Importar: n8n/workflows/chatbot_completo_orquestracao.json          ║
-║     - Configurar credencial WAHA                                          ║
-║     - Ativar workflow                                                     ║
+║     - Workflow "WAHA → API" já ativo                                      ║
+║     - Edite apenas se precisar customizar                                 ║
 ║                                                                            ║
 ║  2️⃣  WAHA (http://localhost:3000)                                         ║
 ║     - Login: admin / Tributos@NovaTrento2025                              ║
