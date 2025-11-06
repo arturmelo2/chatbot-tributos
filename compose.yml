@@ -53,15 +53,26 @@ services:
       - N8N_PROTOCOL=http
       - WEBHOOK_URL=http://n8n:5678/
       - GENERIC_TIMEZONE=America/Sao_Paulo
+      # AUTO-CONFIGURAÇÃO: Bypass setup screen
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_USER:-admin}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD:-Tributos@NovaTrento2025}
+      # Auto-install community nodes
+      - N8N_NODES_INCLUDE=n8n-nodes-waha
       # Variáveis para integração com LLMs
       - GROQ_API_KEY=${GROQ_API_KEY:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       # Aumentar limite de memória para workflows complexos
       - NODE_OPTIONS=--max-old-space-size=2048
+      # WAHA credentials for bootstrap
+      - WAHA_API_KEY=tributos_nova_trento_2025_api_key_fixed
     volumes:
       - n8n_data:/home/node/.n8n
       # Mapear workflows para fácil importação
       - ./n8n/workflows:/home/node/.n8n/workflows:ro
+      # Montar script bootstrap para auto-configuração
+      - ./deploy/bootstrap/n8n-bootstrap.sh:/app/n8n-bootstrap.sh:ro
+    entrypoint: ["/bin/sh", "/app/n8n-bootstrap.sh"]
     networks:
       - tributos_network
     healthcheck:

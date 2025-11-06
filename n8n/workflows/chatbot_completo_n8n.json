@@ -1,248 +1,640 @@
-{
-  "name": "Chatbot Tributos - Completo n8n",
-  "nodes": [
-    {
-      "parameters": {
-        "path": "94a8adfc-1dba-41e7-be61-4c13b51fa08e",
-        "options": {}
-      },
-      "id": "waha-trigger",
-      "name": "WAHA Trigger",
-      "type": "n8n-nodes-waha.wahaTrigger",
-      "typeVersion": 1,
-      "position": [250, 300]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{ $json.payload.from }}",
-              "operation": "contains",
-              "value2": "@g.us"
-            }
-          ]
-        }
-      },
-      "id": "filter-groups",
-      "name": "Filtrar Grupos",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [450, 300]
-    },
-    {
-      "parameters": {},
-      "id": "stop-group",
-      "name": "Ignorar (Grupo)",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [650, 200]
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "chat_id",
-              "name": "chat_id",
-              "value": "={{ $json.payload.from }}",
-              "type": "string"
-            },
-            {
-              "id": "message",
-              "name": "message",
-              "value": "={{ $json.payload.body || $json.payload.text || '' }}",
-              "type": "string"
-            },
-            {
-              "id": "event",
-              "name": "event",
-              "value": "={{ $json.event || 'message' }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "extract-data",
-      "name": "Extrair Dados",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3,
-      "position": [650, 400]
-    },
-    {
-      "parameters": {
-        "url": "http://waha:3000/api/default/chats/typing",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "headerAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $json.chat_id }}\",\n  \"typing\": true\n}",
-        "options": {
-          "ignoreResponseCode": true
-        }
-      },
-      "id": "start-typing",
-      "name": "Iniciar Typing",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
-      "position": [850, 400],
-      "continueOnFail": true
-    },
-    {
-      "parameters": {
-        "url": "http://api:5000/chatbot/webhook/",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"event\": \"{{ $json.event }}\",\n  \"payload\": {\n    \"from\": \"{{ $json.chat_id }}\",\n    \"body\": \"{{ $json.message }}\"\n  }\n}",
-        "options": {
-          "timeout": 60000
-        }
-      },
-      "id": "call-api",
-      "name": "Chamar API Python",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
-      "position": [1050, 400]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Extrair resposta da API\nconst apiResponse = $input.first().json;\n\n// A API retorna { response: \"texto\" } ou { success: true, response: \"texto\" }\nconst response = apiResponse.response || apiResponse.message || 'Desculpe, não consegui processar sua mensagem.';\nconst chat_id = $('Extrair Dados').first().json.chat_id;\n\nreturn [{ json: { response, chat_id } }];"
-      },
-      "id": "extract-response",
-      "name": "Extrair Resposta",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [1250, 400]
-    },
-    {
-      "parameters": {
-        "url": "http://waha:3000/api/sendText",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "headerAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $json.chat_id }}\",\n  \"text\": \"{{ $json.response }}\"\n}",
-        "options": {}
-      },
-      "id": "send-response",
-      "name": "Enviar Resposta WAHA",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
-      "position": [1450, 400]
-    },
-    {
-      "parameters": {
-        "url": "http://waha:3000/api/default/chats/typing",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "headerAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('Extrair Dados').first().json.chat_id }}\",\n  \"typing\": false\n}",
-        "options": {
-          "ignoreResponseCode": true
-        }
-      },
-      "id": "stop-typing",
-      "name": "Parar Typing",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
-      "position": [1650, 400],
-      "continueOnFail": true,
-      "alwaysOutputData": true
-    },
-    {
-      "parameters": {
-        "url": "http://waha:3000/api/default/chats/typing",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "headerAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('Extrair Dados').first().json.chat_id }}\",\n  \"typing\": false\n}",
-        "options": {
-          "ignoreResponseCode": true
-        }
-      },
-      "id": "stop-typing-error",
-      "name": "Parar Typing (Erro)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
-      "position": [1250, 550],
-      "continueOnFail": true
-    },
-    {
-      "parameters": {
-        "url": "http://waha:3000/api/sendText",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "headerAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('Extrair Dados').first().json.chat_id }}\",\n  \"text\": \"Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente ou entre em contato com a Secretaria de Finanças pelo telefone (47) 3267-8000.\"\n}",
-        "options": {}
-      },
-      "id": "send-error",
-      "name": "Enviar Mensagem de Erro",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
-      "position": [1450, 550]
-    }
-  ],
-  "connections": {
-    "WAHA Trigger": {
-      "main": [
-        [
-          {
-            "node": "Filtrar Grupos",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Filtrar Grupos": {
-      "main": [
-        [
-          {
-            "node": "Ignorar (Grupo)",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Extrair Dados",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extrair Dados": {
-      "main": [
-        [
-          {
-            "node": "Iniciar Typing",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Iniciar Typing": {
-      "main": [
-        [
-          {
-            "node": "Chamar API Python",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Chamar API Python": {
-      "main": [
-        [
-          {
+{{
+
+  "name": "Chatbot Tributos - Único",  "name": "Chatbot Tributos - Único",
+
+  "active": false,  "active": false,
+
+  "nodes": [  "nodes": [
+
+    {    {
+
+      "parameters": {      "parameters": {
+
+        "path": "94a8adfc-1dba-41e7-be61-4c13b51fa08e",        "path": "94a8adfc-1dba-41e7-be61-4c13b51fa08e",
+
+        "responseMode": "lastNode",        "options": {}
+
+        "options": {}      },
+
+      },  "id": "webhook",
+
+      "id": "webhook",  "name": "Webhook (WAHA)",
+
+      "name": "Webhook",  "type": "n8n-nodes-base.webhook",
+
+      "type": "n8n-nodes-base.webhook",  "typeVersion": 1,
+
+      "typeVersion": 1,  "position": [200, 300]
+
+      "position": [200, 300]    },
+
+    },    {
+
+    {      "parameters": {
+
+      "parameters": {        "conditions": {
+
+        "conditions": {          "string": [
+
+          "string": [            {
+
+            {              "value1": "={{ $json.payload.from }}",
+
+              "value1": "={{ $json.payload?.from || $json.from || '' }}",              "operation": "contains",
+
+              "operation": "contains",              "value2": "@g.us"
+
+              "value2": "@g.us"            }
+
+            }          ]
+
+          ]        }
+
+        }      },
+
+      },  "id": "if-groups",
+
+      "id": "if-groups",  "name": "Ignorar Grupos",
+
+      "name": "Filtrar Grupos",      "type": "n8n-nodes-base.if",
+
+      "type": "n8n-nodes-base.if",      "typeVersion": 1,
+
+      "typeVersion": 1,      "position": [450, 300]
+
+      "position": [420, 300]    },
+
+    },    {
+
+    {      "parameters": {},
+
+      "parameters": {      "parameters": {
+
+        "respondWith": "json",        "responseCode": 204,
+
+        "responseBody": "={{ { \"status\": \"ignored_group\" } }}"        "responseBody": "={ \"status\": \"ignored_group\" }"
+
+      },      },
+
+      "id": "respond-ignored",      "id": "respond-ignored",
+
+      "name": "Responder (Grupo)",      "name": "Responder 204 (Grupo)",
+
+      "type": "n8n-nodes-base.respondToWebhook",      "type": "n8n-nodes-base.respondToWebhook",
+
+      "typeVersion": 1,      "typeVersion": 1,
+
+      "position": [640, 180]      "position": [640, 200]
+
+    },    },
+
+    {    {
+
+      "parameters": {      "parameters": {
+
+        "assignments": {        "assignments": {
+
+          "assignments": [          "assignments": [
+
+            {            {
+
+              "name": "chat_id",              "id": "chat_id",
+
+              "value": "={{ $json.payload?.from || $json.from }}",              "name": "chat_id",
+
+              "type": "string"              "value": "={{ $json.payload.from }}",
+
+            },              "type": "string"
+
+            {            },
+
+              "name": "message",            {
+
+              "value": "={{ $json.payload?.body || $json.payload?.text || $json.body || '' }}",              "id": "message",
+
+              "type": "string"              "name": "message",
+
+            },              "value": "={{ $json.payload.body || $json.payload.text || '' }}",
+
+            {              "type": "string"
+
+              "name": "event",            },
+
+              "value": "={{ $json.event || 'message' }}",            {
+
+              "type": "string"              "id": "event",
+
+            }              "name": "event",
+
+          ]              "value": "={{ $json.event || 'message' }}",
+
+        }              "type": "string"
+
+      },            }
+
+      "id": "set-extract",          ]
+
+      "name": "Extrair Dados",        },
+
+      "type": "n8n-nodes-base.set",        "options": {}
+
+      "typeVersion": 3,      },
+
+      "position": [640, 420]  "id": "set-extract",
+
+    },  "name": "Extrair Dados",
+
+    {      "type": "n8n-nodes-base.set",
+
+      "parameters": {      "typeVersion": 3,
+
+        "url": "http://waha:3000/api/startTyping",      "position": [650, 400]
+
+        "method": "POST",    },
+
+        "sendBody": true,    {
+
+        "specifyBody": "json",      "parameters": {
+
+        "jsonBody": "={{ { \"session\": \"default\", \"chatId\": $json.chat_id } }}",        "url": "http://waha:3000/api/default/chats/typing",
+
+        "options": {        "authentication": "predefinedCredentialType",
+
+          "ignoreResponseCode": true        "nodeCredentialType": "headerAuth",
+
+        },        "sendBody": true,
+
+        "sendHeaders": true,        "specifyBody": "json",
+
+        "headerParameters": {        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $json.chat_id }}\",\n  \"typing\": true\n}",
+
+          "parameters": [        "options": {
+
+            {          "ignoreResponseCode": true
+
+              "name": "X-Api-Key",        }
+
+              "value": "={{ $env.WAHA_API_KEY }}"      },
+
+            },  "id": "start-typing",
+
+            {  "name": "Iniciar Typing",
+
+              "name": "Content-Type",      "type": "n8n-nodes-base.httpRequest",
+
+              "value": "application/json"      "typeVersion": 4.1,
+
+            }      "position": [850, 400],
+
+          ]      "continueOnFail": true
+
+        }    },
+
+      },    {
+
+      "id": "start-typing",      "parameters": {
+
+      "name": "Iniciar Typing",        "url": "http://api:5000/chatbot/webhook/",
+
+      "type": "n8n-nodes-base.httpRequest",        "sendBody": true,
+
+      "typeVersion": 4.1,        "specifyBody": "json",
+
+      "position": [860, 420],        "jsonBody": "={\n  \"event\": \"{{ $json.event }}\",\n  \"payload\": {\n    \"from\": \"{{ $json.chat_id }}\",\n    \"body\": \"{{ $json.message }}\"\n  }\n}",
+
+      "continueOnFail": true        "options": {
+
+    },          "timeout": 60000
+
+    {        }
+
+      "parameters": {      },
+
+        "url": "http://api:5000/chatbot/webhook/",  "id": "call-api",
+
+        "method": "POST",  "name": "Chamar API Python",
+
+        "sendBody": true,      "type": "n8n-nodes-base.httpRequest",
+
+        "specifyBody": "json",      "typeVersion": 4.1,
+
+        "jsonBody": "={{ { \"event\": $json.event, \"payload\": { \"from\": $json.chat_id, \"body\": $json.message } } }}",      "position": [1050, 400]
+
+        "options": {    },
+
+          "timeout": 60000    {
+
+        }      "parameters": {
+
+      },        "jsCode": "// Extrair resposta da API\nconst apiResponse = $input.first().json;\n\n// A API retorna { response: \"texto\" } ou { success: true, response: \"texto\" }\nconst response = apiResponse.response || apiResponse.message || 'Desculpe, não consegui processar sua mensagem.';\nconst chat_id = $('Extrair Dados').first().json.chat_id;\n\nreturn [{ json: { response, chat_id } }];"
+
+      "id": "call-api",      },
+
+      "name": "Chamar API",  "id": "code-extract-response",
+
+      "type": "n8n-nodes-base.httpRequest",  "name": "Extrair Resposta",
+
+      "typeVersion": 4.1,      "type": "n8n-nodes-base.code",
+
+      "position": [1080, 420]      "typeVersion": 2,
+
+    },      "position": [1250, 400]
+
+    {    },
+
+      "parameters": {    {
+
+        "jsCode": "const api = $input.first().json || {};\nconst response = api.response || api.message || api.text || 'Desculpe, não consegui processar sua mensagem.';\nconst chat_id = $('Extrair Dados').first().json.chat_id;\nreturn [{ json: { response, chat_id } }];"      "parameters": {
+
+      },        "url": "http://waha:3000/api/sendText",
+
+      "id": "code-extract",        "authentication": "predefinedCredentialType",
+
+      "name": "Extrair Resposta",        "nodeCredentialType": "headerAuth",
+
+      "type": "n8n-nodes-base.code",        "sendBody": true,
+
+      "typeVersion": 2,        "specifyBody": "json",
+
+      "position": [1300, 420]        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $json.chat_id }}\",\n  \"text\": \"{{ $json.response }}\"\n}",
+
+    },        "options": {}
+
+    {      },
+
+      "parameters": {  "id": "send-message",
+
+        "url": "http://waha:3000/api/sendText",  "name": "Enviar Resposta WAHA",
+
+        "method": "POST",      "type": "n8n-nodes-base.httpRequest",
+
+        "sendBody": true,      "typeVersion": 4.1,
+
+        "specifyBody": "json",      "position": [1450, 400]
+
+        "jsonBody": "={{ { \"session\": \"default\", \"chatId\": $json.chat_id, \"text\": $json.response } }}",    },
+
+        "sendHeaders": true,    {
+
+        "headerParameters": {      "parameters": {
+
+          "parameters": [        "url": "http://waha:3000/api/default/chats/typing",
+
+            {        "authentication": "predefinedCredentialType",
+
+              "name": "X-Api-Key",        "nodeCredentialType": "headerAuth",
+
+              "value": "={{ $env.WAHA_API_KEY }}"        "sendBody": true,
+
+            },        "specifyBody": "json",
+
+            {        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('Extrair Dados').first().json.chat_id }}\",\n  \"typing\": false\n}",
+
+              "name": "Content-Type",        "options": {
+
+              "value": "application/json"          "ignoreResponseCode": true
+
+            }        }
+
+          ]      },
+
+        }  "id": "stop-typing",
+
+      },  "name": "Parar Typing",
+
+      "id": "send-message",      "type": "n8n-nodes-base.httpRequest",
+
+      "name": "Enviar Mensagem",      "typeVersion": 4.1,
+
+      "type": "n8n-nodes-base.httpRequest",      "position": [1650, 400],
+
+      "typeVersion": 4.1,      "continueOnFail": true,
+
+      "position": [1520, 420]      "alwaysOutputData": true
+
+    },    },
+
+    {    {
+
+      "parameters": {      "parameters": {
+
+        "url": "http://waha:3000/api/stopTyping",        "url": "http://waha:3000/api/default/chats/typing",
+
+        "method": "POST",        "authentication": "predefinedCredentialType",
+
+        "sendBody": true,        "nodeCredentialType": "headerAuth",
+
+        "specifyBody": "json",        "sendBody": true,
+
+        "jsonBody": "={{ { \"session\": \"default\", \"chatId\": $('Extrair Dados').first().json.chat_id } }}",        "specifyBody": "json",
+
+        "options": {        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('Extrair Dados').first().json.chat_id }}\",\n  \"typing\": false\n}",
+
+          "ignoreResponseCode": true        "options": {
+
+        },          "ignoreResponseCode": true
+
+        "sendHeaders": true,        }
+
+        "headerParameters": {      },
+
+          "parameters": [  "id": "stop-typing-error",
+
+            {  "name": "Parar Typing (Erro)",
+
+              "name": "X-Api-Key",      "type": "n8n-nodes-base.httpRequest",
+
+              "value": "={{ $env.WAHA_API_KEY }}"      "typeVersion": 4.1,
+
+            },      "position": [1250, 550],
+
+            {      "continueOnFail": true
+
+              "name": "Content-Type",    },
+
+              "value": "application/json"    {
+
+            }      "parameters": {
+
+          ]        "url": "http://waha:3000/api/sendText",
+
+        }        "authentication": "predefinedCredentialType",
+
+      },        "nodeCredentialType": "headerAuth",
+
+      "id": "stop-typing",        "sendBody": true,
+
+      "name": "Parar Typing",        "specifyBody": "json",
+
+      "type": "n8n-nodes-base.httpRequest",        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('Extrair Dados').first().json.chat_id }}\",\n  \"text\": \"Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente ou entre em contato com a Secretaria de Finanças pelo telefone (47) 3267-8000.\"\n}",
+
+      "typeVersion": 4.1,        "options": {}
+
+      "position": [1740, 420],      },
+
+      "continueOnFail": true,      "id": "send-error",
+
+      "alwaysOutputData": true      "name": "Enviar Mensagem de Erro",
+
+    },    },
+
+    {    {
+
+      "parameters": {      "parameters": {
+
+        "respondWith": "json",        "responseCode": 200,
+
+        "responseBody": "={{ { \"status\": \"ok\" } }}"        "responseBody": "={ \"status\": \"ok\", \"echo\": $json }"
+
+      },      },
+
+      "id": "respond-ok",      "id": "respond-ok",
+
+      "name": "Responder OK",      "name": "Responder 200",
+
+      "type": "n8n-nodes-base.respondToWebhook",      "type": "n8n-nodes-base.respondToWebhook",
+
+      "typeVersion": 1,      "typeVersion": 1,
+
+      "position": [1960, 420]      "position": [1960, 420]
+
+    },    },
+
+    {    {
+
+      "parameters": {      "parameters": {
+
+        "url": "http://waha:3000/api/stopTyping",        "responseCode": 200,
+
+        "method": "POST",        "responseBody": "={ \"status\": \"error_handled\" }"
+
+        "sendBody": true,      },
+
+        "specifyBody": "json",      "id": "respond-error",
+
+        "jsonBody": "={{ { \"session\": \"default\", \"chatId\": $('Extrair Dados').first().json.chat_id } }}",      "name": "Responder (Erro)",
+
+        "options": {      "type": "n8n-nodes-base.respondToWebhook",
+
+          "ignoreResponseCode": true      "typeVersion": 1,
+
+        },      "position": [1740, 600]
+
+        "sendHeaders": true,      "type": "n8n-nodes-base.httpRequest",
+
+        "headerParameters": {      "typeVersion": 4.1,
+
+          "parameters": [      "position": [1450, 550]
+
+            {    }
+
+              "name": "X-Api-Key",  ],
+
+              "value": "={{ $env.WAHA_API_KEY }}"  "connections": {
+
+            }    "WAHA Trigger": {
+
+          ]      "main": [
+
+        }        [
+
+      },          {
+
+      "id": "stop-typing-error",            "node": "Filtrar Grupos",
+
+      "name": "Parar Typing (Erro)",            "type": "main",
+
+      "type": "n8n-nodes-base.httpRequest",            "index": 0
+
+      "typeVersion": 4.1,          }
+
+      "position": [1300, 620],        ]
+
+      "continueOnFail": true      ]
+
+    },    },
+
+    {    "Filtrar Grupos": {
+
+      "parameters": {      "main": [
+
+        "url": "http://waha:3000/api/sendText",        [
+
+        "method": "POST",          {
+
+        "sendBody": true,            "node": "Ignorar (Grupo)",
+
+        "specifyBody": "json",            "type": "main",
+
+        "jsonBody": "={{ { \"session\": \"default\", \"chatId\": $('Extrair Dados').first().json.chat_id, \"text\": \"Desculpe, erro ao processar. Tente novamente.\" } }}",            "index": 0
+
+        "sendHeaders": true,          }
+
+        "headerParameters": {        ],
+
+          "parameters": [        [
+
+            {          {
+
+              "name": "X-Api-Key",            "node": "Extrair Dados",
+
+              "value": "={{ $env.WAHA_API_KEY }}"            "type": "main",
+
+            }            "index": 0
+
+          ]          }
+
+        }        ]
+
+      },      ]
+
+      "id": "send-error",    },
+
+      "name": "Enviar Erro",    "Extrair Dados": {
+
+      "type": "n8n-nodes-base.httpRequest",      "main": [
+
+      "typeVersion": 4.1,        [
+
+      "position": [1520, 620]          {
+
+    },            "node": "Iniciar Typing",
+
+    {            "type": "main",
+
+      "parameters": {            "index": 0
+
+        "respondWith": "json",          }
+
+        "responseBody": "={{ { \"status\": \"error_handled\" } }}"        ]
+
+      },      ]
+
+      "id": "respond-error",    },
+
+      "name": "Responder (Erro)",    "Iniciar Typing": {
+
+      "type": "n8n-nodes-base.respondToWebhook",      "main": [
+
+      "typeVersion": 1,        [
+
+      "position": [1740, 620]          {
+
+    }            "node": "Chamar API Python",
+
+  ],            "type": "main",
+
+  "connections": {            "index": 0
+
+    "Webhook": {          }
+
+      "main": [        ]
+
+        [      ]
+
+          {    },
+
+            "node": "Filtrar Grupos",    "Chamar API Python": {
+
+            "type": "main",      "main": [
+
+            "index": 0        [
+
+          }          {
+
+        ]            "node": "Extrair Resposta",
+
+      ]            "type": "main",
+
+    },            "index": 0
+
+    "Filtrar Grupos": {          }
+
+      "main": [        ]
+
+        [      ],
+
+          {      "error": [
+
+            "node": "Responder (Grupo)",        [
+
+            "type": "main",          {
+
+            "index": 0            "node": "Parar Typing (Erro)",
+
+          }            "type": "main",
+
+        ],            "index": 0
+
+        [          }
+
+          {        ]
+
+            "node": "Extrair Dados",      ]
+
+            "type": "main",    },
+
+            "index": 0    "Extrair Resposta": {
+
+          }      "main": [
+
+        ]        [
+
+      ]          {
+
+    },            "node": "Enviar Resposta WAHA",
+
+    "Extrair Dados": {            "type": "main",
+
+      "main": [            "index": 0
+
+        [          }
+
+          {        ]
+
+            "node": "Iniciar Typing",      ]
+
+            "type": "main",    },
+
+            "index": 0    "Enviar Resposta WAHA": {
+
+          }      "main": [
+
+        ]        [
+
+      ]          {
+
+    },            "node": "Parar Typing",
+
+    "Iniciar Typing": {            "type": "main",
+
+      "main": [            "index": 0
+
+        [          }
+
+          {        ]
+
+            "node": "Chamar API",      ]
+
+            "type": "main",    },
+
+            "index": 0    "Parar Typing (Erro)": {
+
+          }      "main": [
+
+        ]        [
+
+      ]          {
+
+    },            "node": "Enviar Mensagem de Erro",
+
+    "Chamar API": {            "type": "main",
+
+      "main": [            "index": 0
+
+        [          }
+
+          {        ]
             "node": "Extrair Resposta",
             "type": "main",
             "index": 0
@@ -263,14 +655,14 @@
       "main": [
         [
           {
-            "node": "Enviar Resposta WAHA",
+            "node": "Enviar Mensagem",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Enviar Resposta WAHA": {
+    "Enviar Mensagem": {
       "main": [
         [
           {
@@ -281,12 +673,44 @@
         ]
       ]
     },
-    "Parar Typing (Erro)": {
+    "Parar Typing": {
       "main": [
         [
           {
-            "node": "Enviar Mensagem de Erro",
+            "node": "Responder OK",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Parar Typing (Erro)": {
+      "main": [
+        [
+          {
+            "node": "Enviar Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Erro": {
+      "main": [
+        [
+          {
+            "node": "Responder (Erro)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-11-06T00:00:00.000Z",
+  "versionId": "1"
+}
