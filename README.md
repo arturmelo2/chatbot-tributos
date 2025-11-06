@@ -6,6 +6,24 @@ Sistema de chatbot inteligente para atendimento automatizado sobre tributos muni
 
 **Arquitetura:** WhatsApp → WAHA → n8n (orquestração) → API Python (RAG+LLM) → n8n → WAHA
 
+---
+
+## 🎯 **SISTEMA PRONTO PARA USO!**
+
+> ✅ **Todas as credenciais já configuradas**  
+> ✅ **Base de conhecimento com 66 documentos**  
+> ✅ **Scripts de deploy automatizados**
+
+### ⚡ Deploy em 1 Comando
+
+```powershell
+.\QUICK-START.ps1
+```
+
+**OU** siga o guia passo a passo: [**START-HERE.md**](START-HERE.md) 📘
+
+---
+
 ## 🚀 Início Rápido (Docker)
 
 ```bash
@@ -221,13 +239,23 @@ KNOWLEDGE_PATH=./rag/data
 
 ## 📖 Guias e Documentação
 
-Todos os arquivos de documentação e guias foram movidos para a pasta `docs/`:
+### 🚀 Produção (COMECE AQUI!)
+- [**START-HERE.md**](START-HERE.md) — 🎯 **Deploy em 5 minutos**
+- [**PRODUCTION-README.md**](PRODUCTION-README.md) — Guia completo de produção
+- [**DEPLOY.md**](DEPLOY.md) — Deploy detalhado passo a passo
+- [**QUICK-START.ps1**](QUICK-START.ps1) — Script de deploy automático
 
+### 📚 Documentação Técnica
+- [ARCHITECTURE.md](ARCHITECTURE.md) — Arquitetura do sistema
+- [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) — Estrutura do repositório
+- [CHANGELOG.md](CHANGELOG.md) — Histórico de versões
+- [STATUS.md](STATUS.md) — Status do projeto
+
+### 🛠️ Desenvolvimento
 - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — Guia completo de desenvolvimento
 - [docs/DOCKER_DESKTOP.md](docs/DOCKER_DESKTOP.md) — Instalação do Docker
 - [docs/CONFIGURAR_N8N.md](docs/CONFIGURAR_N8N.md) — Integração n8n
 - [docs/TROUBLESHOOTING_PORTA_3000.md](docs/TROUBLESHOOTING_PORTA_3000.md) — Resolver conflitos de porta
-- [docs/STATUS.md](docs/STATUS.md) — Status do projeto
 - [docs/QUICK_START_DOCKER.md](docs/QUICK_START_DOCKER.md) — Guia rápido Docker
 - [docs/DOCS_TRIBUTOS.md](docs/DOCS_TRIBUTOS.md) — Documentação técnica
 - [docs/CREDENCIAIS_WAHA.md](docs/CREDENCIAIS_WAHA.md) — Credenciais WAHA

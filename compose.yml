@@ -103,8 +103,12 @@ services:
       - WAHA_API_KEY=tributos_nova_trento_2025_api_key_fixed
       - PORT=5000
       - ENVIRONMENT=production
+      - DEBUG=false
+      - LOG_LEVEL=INFO
     depends_on:
       waha:
+        condition: service_started
+      n8n:
         condition: service_started
     networks:
       - tributos_network
@@ -114,6 +118,12 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
 
 # -----------------------------------------------------------------------------
 # Volumes Persistentes
