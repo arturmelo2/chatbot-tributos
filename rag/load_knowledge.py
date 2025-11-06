@@ -359,7 +359,17 @@ def load_knowledge(
 
     # Filtrar metadados complexos (listas, dicts, etc) que ChromaDB não aceita
     print("\n🔧 Filtrando metadados complexos...")
+    
+    # Debug: verificar metadados antes e depois do filtro
+    print(f"\n🔍 Debug - Chunk 100 metadata antes do filtro:")
+    if len(chunks) >= 100:
+        print(f"   {chunks[99].metadata}")
+    
     chunks = filter_complex_metadata(chunks)
+    
+    print(f"\n🔍 Debug - Chunk 100 metadata depois do filtro:")
+    if len(chunks) >= 100:
+        print(f"   {chunks[99].metadata}")
 
     # Adicionar ao Chroma
     print("\n💾 Adicionando chunks ao Chroma...")
