@@ -2,13 +2,27 @@
   "name": "WAHA → API (mensagens) [8c0ac011]",
   "nodes": [
     {
-      "parameters": {},
-      "type": "n8n-nodes-waha.wahaTrigger",
-      "typeVersion": 202411,
-      "position": [280, 300],
-      "id": "ed600a13-e176-4b43-9d03-78c01ef38b98",
-      "name": "WAHA Trigger",
-      "webhookId": "8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b"
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b",
+        "responseMode": "onReceived",
+        "options": {
+          "responseCode": 200,
+          "responseData": {
+            "values": [
+              {
+                "name": "status",
+                "value": "received"
+              }
+            ]
+          }
+        }
+      },
+      "id": "webhook-waha",
+      "name": "WAHA Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
     },
     {
       "parameters": {
@@ -22,7 +36,21 @@
       "name": "Só mensagens?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [540, 300]
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            { "value1": "={{ $json.payload.from }}", "operation": "endsWith", "value2": "@g.us" }
+          ]
+        }
+      },
+      "id": "if-group",
+      "name": "É grupo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [740, 300]
     },
     {
       "parameters": {
@@ -37,12 +65,67 @@
       "name": "Enviar para API",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [820, 240]
+      "position": [1000, 240]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"status\": \"ignored-group\"}"
+      },
+      "id": "respond-group",
+      "name": "Responder: grupo ignorado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1000, 380]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"status\": \"forwarded\"}"
+      },
+      "id": "respond-ok",
+      "name": "Responder OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1240, 240]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"status\": \"ignored-event\"}"
+      },
+      "id": "respond-ignore",
+      "name": "Responder: evento ignorado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [740, 460]
     }
   ],
   "connections": {
-    "WAHA Trigger": { "main": [[{ "node": "Só mensagens?", "type": "main", "index": 0 }]] },
-    "Só mensagens?": { "main": [[{ "node": "Enviar para API", "type": "main", "index": 0 }], []] }
+    "WAHA Webhook": {
+      "main": [
+        [
+          { "node": "Só mensagens?", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Só mensagens?": {
+      "main": [
+        [ { "node": "É grupo?", "type": "main", "index": 0 } ],
+        [ { "node": "Responder: evento ignorado", "type": "main", "index": 0 } ]
+      ]
+    },
+    "É grupo?": {
+      "main": [
+        [ { "node": "Enviar para API", "type": "main", "index": 0 } ],
+        [ { "node": "Responder: grupo ignorado", "type": "main", "index": 0 } ]
+      ]
+    },
+    "Enviar para API": {
+      "main": [
+        [ { "node": "Responder OK", "type": "main", "index": 0 } ]
+      ]
+    }
   },
   "pinData": {},
   "meta": { "templateCredsSetupCompleted": true }

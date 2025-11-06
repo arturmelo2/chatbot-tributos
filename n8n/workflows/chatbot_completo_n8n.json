@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "path": "8c0ac011-c46c-4c2c-bab1-ac5e0c3a365b/waha",
+        "path": "94a8adfc-1dba-41e7-be61-4c13b51fa08e",
         "options": {}
       },
       "id": "waha-trigger",
@@ -40,41 +40,24 @@
     },
     {
       "parameters": {
-        "url": "=http://waha:3000/api/default/chats/{{ $json.payload.from }}/messages?limit=10&downloadMedia=false",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "headerAuth",
-        "options": {}
-      },
-      "id": "get-history",
-      "name": "Buscar Histórico WAHA",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
-      "position": [650, 400]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Formatar histórico de mensagens\nconst messages = $input.first().json.messages || [];\n\nconst history = messages\n  .map(m => ({\n    role: m.fromMe ? 'assistant' : 'user',\n    content: m.body || m.text || ''\n  }))\n  .filter(m => m.content)\n  .reverse(); // Mais antigas primeiro\n\nreturn [{ json: { history } }];"
-      },
-      "id": "format-history",
-      "name": "Formatar Histórico",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [850, 400]
-    },
-    {
-      "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "question",
-              "name": "question",
-              "value": "={{ $('WAHA Trigger').first().json.payload.body }}",
+              "id": "chat_id",
+              "name": "chat_id",
+              "value": "={{ $json.payload.from }}",
               "type": "string"
             },
             {
-              "id": "chat_id",
-              "name": "chat_id",
-              "value": "={{ $('WAHA Trigger').first().json.payload.from }}",
+              "id": "message",
+              "name": "message",
+              "value": "={{ $json.payload.body || $json.payload.text || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "event",
+              "name": "event",
+              "value": "={{ $json.event || 'message' }}",
               "type": "string"
             }
           ]
@@ -85,62 +68,52 @@
       "name": "Extrair Dados",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3,
+      "position": [650, 400]
+    },
+    {
+      "parameters": {
+        "url": "http://waha:3000/api/default/chats/typing",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "headerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $json.chat_id }}\",\n  \"typing\": true\n}",
+        "options": {
+          "ignoreResponseCode": true
+        }
+      },
+      "id": "start-typing",
+      "name": "Iniciar Typing",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 400],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "http://api:5000/chatbot/webhook/",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"event\": \"{{ $json.event }}\",\n  \"payload\": {\n    \"from\": \"{{ $json.chat_id }}\",\n    \"body\": \"{{ $json.message }}\"\n  }\n}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "call-api",
+      "name": "Chamar API Python",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
       "position": [1050, 400]
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "system",
-              "name": "system",
-              "value": "Você é um assistente virtual da Prefeitura Municipal de Nova Trento/SC.\n\nResponda perguntas sobre tributos municipais (IPTU, ISS, taxas, certidões) de forma:\n- Educada e profissional\n- Clara e objetiva\n- Baseada em informações oficiais\n\nSe não souber a resposta, oriente o cidadão a entrar em contato com a Secretaria de Finanças.\n\nLinks úteis:\n- IPTU: https://exemplo.sc.gov.br/iptu\n- Certidões: https://exemplo.sc.gov.br/certidoes\n- Atendimento: (47) 3267-8000",
-              "type": "string"
-            },
-            {
-              "id": "history",
-              "name": "history",
-              "value": "={{ $('Formatar Histórico').first().json.history }}",
-              "type": "object"
-            }
-          ]
-        }
+        "jsCode": "// Extrair resposta da API\nconst apiResponse = $input.first().json;\n\n// A API retorna { response: \"texto\" } ou { success: true, response: \"texto\" }\nconst response = apiResponse.response || apiResponse.message || 'Desculpe, não consegui processar sua mensagem.';\nconst chat_id = $('Extrair Dados').first().json.chat_id;\n\nreturn [{ json: { response, chat_id } }];"
       },
-      "id": "prepare-llm",
-      "name": "Preparar Prompt LLM",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3,
-      "position": [1250, 400]
-    },
-    {
-      "parameters": {
-        "model": "llama-3.3-70b-versatile",
-        "options": {
-          "temperature": 0.3,
-          "maxTokens": 500
-        }
-      },
-      "id": "groq-llm",
-      "name": "Groq LLM",
-      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
-      "typeVersion": 1,
-      "position": [1450, 400],
-      "credentials": {
-        "groqApi": {
-          "id": "groq-credentials",
-          "name": "Groq API"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "// Montar mensagens para o LLM\nconst system = $json.system;\nconst history = $json.history || [];\nconst question = $json.question;\n\nconst messages = [\n  { role: 'system', content: system },\n  ...history.slice(-8), // Últimas 8 mensagens\n  { role: 'user', content: question }\n];\n\nreturn [{ json: { messages } }];"
-      },
-      "id": "build-messages",
-      "name": "Montar Mensagens",
+      "id": "extract-response",
+      "name": "Extrair Resposta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1450, 300]
+      "position": [1250, 400]
     },
     {
       "parameters": {
@@ -149,25 +122,69 @@
         "nodeCredentialType": "headerAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('Extrair Dados').first().json.chat_id }}\",\n  \"text\": \"{{ $json.response }}\"\n}",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $json.chat_id }}\",\n  \"text\": \"{{ $json.response }}\"\n}",
         "options": {}
       },
       "id": "send-response",
       "name": "Enviar Resposta WAHA",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
-      "position": [1850, 400]
+      "position": [1450, 400]
     },
     {
       "parameters": {
-        "jsCode": "// Simular resposta do LLM (substitua por nó LLM real)\nconst messages = $input.first().json.messages;\nconst lastMessage = messages[messages.length - 1].content;\n\n// Resposta simulada\nlet response = 'Olá! Sou o assistente da Prefeitura de Nova Trento/SC.\\n\\n';\n\nif (lastMessage.toLowerCase().includes('iptu')) {\n  response += '📋 Para consultar seu IPTU:\\n\\n';\n  response += '1. Acesse: https://exemplo.sc.gov.br/iptu\\n';\n  response += '2. Informe o número da inscrição\\n';\n  response += '3. Imprima a guia\\n\\n';\n  response += 'Dúvidas? Ligue: (47) 3267-8000';\n} else if (lastMessage.toLowerCase().includes('certidão')) {\n  response += '📄 Certidões disponíveis:\\n\\n';\n  response += '• Negativa de Débitos\\n';\n  response += '• Quitação de IPTU\\n';\n  response += '• Regularidade Fiscal\\n\\n';\n  response += 'Solicite em: https://exemplo.sc.gov.br/certidoes';\n} else if (lastMessage.toLowerCase().includes('iss')) {\n  response += '💼 ISS (Imposto Sobre Serviços):\\n\\n';\n  response += 'Alíquota: 2% a 5% dependendo do serviço\\n';\n  response += 'Pagamento: Mensal via guia\\n\\n';\n  response += 'Mais informações: (47) 3267-8000';\n} else {\n  response += 'Posso ajudar com informações sobre:\\n\\n';\n  response += '📋 IPTU\\n';\n  response += '📄 Certidões\\n';\n  response += '💼 ISS\\n';\n  response += '📞 Atendimento\\n\\n';\n  response += 'Como posso ajudar?';\n}\n\nreturn [{ json: { response } }];"
+        "url": "http://waha:3000/api/default/chats/typing",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "headerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('Extrair Dados').first().json.chat_id }}\",\n  \"typing\": false\n}",
+        "options": {
+          "ignoreResponseCode": true
+        }
       },
-      "id": "generate-response",
-      "name": "Gerar Resposta",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "id": "stop-typing",
+      "name": "Parar Typing",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
       "position": [1650, 400],
-      "notes": "Substitua este nó por um LLM real (Groq/OpenAI) quando configurar as credenciais"
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "http://waha:3000/api/default/chats/typing",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "headerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('Extrair Dados').first().json.chat_id }}\",\n  \"typing\": false\n}",
+        "options": {
+          "ignoreResponseCode": true
+        }
+      },
+      "id": "stop-typing-error",
+      "name": "Parar Typing (Erro)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1250, 550],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "http://waha:3000/api/sendText",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "headerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{ $('Extrair Dados').first().json.chat_id }}\",\n  \"text\": \"Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente ou entre em contato com a Secretaria de Finanças pelo telefone (47) 3267-8000.\"\n}",
+        "options": {}
+      },
+      "id": "send-error",
+      "name": "Enviar Mensagem de Erro",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1450, 550]
     }
   ],
   "connections": {
@@ -193,28 +210,6 @@
         ],
         [
           {
-            "node": "Buscar Histórico WAHA",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Buscar Histórico WAHA": {
-      "main": [
-        [
-          {
-            "node": "Formatar Histórico",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Formatar Histórico": {
-      "main": [
-        [
-          {
             "node": "Extrair Dados",
             "type": "main",
             "index": 0
@@ -226,36 +221,45 @@
       "main": [
         [
           {
-            "node": "Preparar Prompt LLM",
+            "node": "Iniciar Typing",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Preparar Prompt LLM": {
+    "Iniciar Typing": {
       "main": [
         [
           {
-            "node": "Montar Mensagens",
+            "node": "Chamar API Python",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Montar Mensagens": {
+    "Chamar API Python": {
       "main": [
         [
           {
-            "node": "Gerar Resposta",
+            "node": "Extrair Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Parar Typing (Erro)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Gerar Resposta": {
+    "Extrair Resposta": {
       "main": [
         [
           {
@@ -265,15 +269,24 @@
           }
         ]
       ]
-    }
-  },
-  "pinData": {},
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "staticData": null,
-  "tags": [],
-  "triggerCount": 1,
-  "updatedAt": "2025-11-04T00:00:00.000Z",
-  "versionId": "1"
-}
+    },
+    "Enviar Resposta WAHA": {
+      "main": [
+        [
+          {
+            "node": "Parar Typing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parar Typing (Erro)": {
+      "main": [
+        [
+          {
+            "node": "Enviar Mensagem de Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]

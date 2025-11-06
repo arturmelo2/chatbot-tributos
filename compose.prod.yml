@@ -89,13 +89,10 @@ services:
       - ANONYMIZED_TELEMETRY=FALSE
     volumes:
       - ./data/chroma:/chroma/chroma
+    ports:
+      - "8000:8000"
     networks:
       - chatbot_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   # ---------------------------------------------------------------------------
   # WAHA - WhatsApp HTTP API (Auto-Restore Session)
@@ -132,7 +129,7 @@ services:
       start_period: 60s
 
   # ---------------------------------------------------------------------------
-  # n8n - Workflow Automation (Auto-Bootstrap)
+  # n8n - Workflow Automation
   # ---------------------------------------------------------------------------
   n8n:
     image: n8nio/n8n:latest
@@ -141,28 +138,20 @@ services:
     environment:
       - N8N_HOST=0.0.0.0
       - N8N_PORT=5678
-      - N8N_PROTOCOL=${N8N_PROTOCOL:-https}
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
-      - WEBHOOK_URL=https://n8n.${DOMAIN}/
+      - WEBHOOK_URL=http://${DOMAIN}:5678/
       - GENERIC_TIMEZONE=America/Sao_Paulo
       - N8N_METRICS=true
-      # Auto-create owner user on first boot
-      - N8N_OWNER_EMAIL=${N8N_OWNER_EMAIL:-admin@localhost}
-      - N8N_OWNER_PASSWORD=${N8N_OWNER_PASSWORD}
-      - N8N_OWNER_FIRST_NAME=${N8N_OWNER_FIRST_NAME:-Admin}
-      - N8N_OWNER_LAST_NAME=${N8N_OWNER_LAST_NAME:-Chatbot}
-      # Community nodes
-      - N8N_COMMUNITY_PACKAGES=${N8N_COMMUNITY_PACKAGES:-n8n-nodes-waha}
       # LLM integrations
       - GROQ_API_KEY=${GROQ_API_KEY:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - XAI_API_KEY=${XAI_API_KEY:-}
-      # WAHA credentials for bootstrap
-      - WAHA_API_KEY=${WAHA_API_KEY:-tributos_nova_trento_2025_api_key_fixed}
     volumes:
       - ./data/n8n:/home/node/.n8n
       - ./n8n/workflows:/home/node/.n8n/workflows:ro
-      - ./deploy/bootstrap/n8n-bootstrap.sh:/scripts/bootstrap.sh:ro
+    ports:
+      - "5678:5678"
     networks:
       - chatbot_network
     depends_on:
@@ -170,22 +159,6 @@ services:
         condition: service_healthy
       waha:
         condition: service_started
-    # Bootstrap script integration
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        # Executar bootstrap na primeira inicialização
-        if [ -f "/scripts/bootstrap.sh" ]; then
-          /scripts/bootstrap.sh
-        fi
-        # Iniciar n8n
-        exec tini -- /docker-entrypoint.sh n8n start
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.n8n.rule=Host(`n8n.${DOMAIN}`)"
-      - "traefik.http.routers.n8n.entrypoints=websecure"
-      - "traefik.http.routers.n8n.tls.certresolver=letsencrypt"
-      - "traefik.http.services.n8n.loadbalancer.server.port=5678"
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5678/healthz"]
       interval: 30s
@@ -232,44 +205,14 @@ services:
       - ./logs:/app/logs
       - ./exports:/app/exports
       - ./data/chroma:/app/chroma_data
-      - ./scripts/wait-for.sh:/scripts/wait-for.sh:ro
-      - ./scripts/load-knowledge.sh:/scripts/load-knowledge.sh:ro
+    ports:
+      - "5000:5000"
     networks:
       - chatbot_network
     depends_on:
-      chromadb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      n8n:
-        condition: service_started
-    # Wait for ChromaDB to be ready, then load knowledge
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        # Aguardar ChromaDB
-        /scripts/wait-for.sh chromadb:8000 -t 60 --
-        
-        # Auto-carregar knowledge base
-        if [ "$AUTO_LOAD_KNOWLEDGE" = "true" ]; then
-          echo "🔄 Auto-loading knowledge base..."
-          /scripts/load-knowledge.sh
-        fi
-        
-        # Iniciar API
-        exec python app.py
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`api.${DOMAIN}`)"
-      - "traefik.http.routers.api.entrypoints=websecure"
-      - "traefik.http.routers.api.tls.certresolver=letsencrypt"
-      - "traefik.http.services.api.loadbalancer.server.port=5000"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 90s
+      - chromadb
+      - redis
+      - n8n
     deploy:
       resources:
         limits:
