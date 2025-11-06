@@ -1,2 +1,0 @@
-# This directory contains Traefik reverse proxy configuration
-# acme.json is gitignored (contains SSL certificates)

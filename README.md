@@ -8,54 +8,115 @@ Sistema de chatbot inteligente para atendimento automatizado sobre tributos muni
 
 ---
 
-## 🎯 **SISTEMA PRONTO PARA USO!**
+## 🎯 **SISTEMA 100% AUTOMATIZADO!**
 
-> ✅ **Todas as credenciais já configuradas**  
-> ✅ **Base de conhecimento com 66 documentos**  
-> ✅ **Scripts de deploy automatizados**
+> ✅ **Automação Zero-Touch: UM único comando faz tudo**  
+> ✅ **Base de conhecimento com 65 documentos (461 chunks)**  
+> ✅ **n8n auto-configura: workflow + credenciais + community node**  
+> ✅ **WAHA verifica e conecta sessão automaticamente**
 
-### ⚡ Deploy em 1 Comando
+### ⚡ Deploy em 1 COMANDO (Zero-Touch)
 
-```powershell
-.\QUICK-START.ps1
+```bash
+# PRIMEIRO USO: Escaneia QR code uma vez
+make up
+
+# Carregar conhecimento (apenas uma vez)
+make load-knowledge
+
+# Ver todos os comandos disponíveis
+make help
+
+# PRÓXIMOS USOS: ZERO configuração, tudo automático!
+make up
 ```
 
-**OU** siga o guia passo a passo: [**START-HERE.md**](START-HERE.md) 📘
+**📘 Guia completo de automação:** [**AUTOMACAO-N8N.md**](AUTOMACAO-N8N.md)  
+**🧪 Checklist de testes:** [**TESTE-AUTOMACAO.md**](TESTE-AUTOMACAO.md)  
+**� Migração PowerShell → Makefile:** [**MIGRACAO-MAKEFILE.md**](MIGRACAO-MAKEFILE.md)
 
 ---
 
-## 🚀 Início Rápido (Docker)
+## 🚀 O que acontece automaticamente
+
+### 1️⃣ **Docker Compose**
+- ✅ WAHA inicia na porta 3000
+- ✅ n8n inicia na porta 5679 com bootstrap script
+- ✅ API inicia na porta 5000
+
+### 2️⃣ **n8n Bootstrap** (automático via script)
+- ✅ Cria usuário `admin` / `Tributos@NovaTrento2025`
+- ✅ Instala community node `n8n-nodes-waha`
+- ✅ Importa workflow `chatbot_completo_n8n.json`
+- ✅ Cria credencial WAHA (Header Auth)
+- ✅ Ativa workflow
+
+### 3️⃣ **WAHA** (verificação inteligente)
+- ✅ Verifica sessão via API
+- ✅ Se já conectado: informa "pronto"
+- ✅ Se primeira vez: abre QR code automaticamente
+- ✅ Aguarda escaneamento (60s timeout)
+- ✅ Confirma conexão
+- ✅ Próximas vezes: restaura sessão automaticamente
+
+---
+
+## 🔐 Credenciais (auto-configuradas)
+
+| Serviço | URL | Usuário | Senha |
+|---------|-----|---------|-------|
+| **n8n** | http://localhost:5679 | `admin` | `Tributos@NovaTrento2025` |
+| **WAHA** | http://localhost:3000 | `admin` | `Tributos@NovaTrento2025` |
+| **API** | http://localhost:5000 | - | - |
+
+---
+
+## 🚀 Início Rápido (Detalhado)
 
 ```bash
-# 1. Configurar variáveis de ambiente
-cp .env.example .env
-# Editar .env com suas credenciais (GROQ_API_KEY ou OPENAI_API_KEY)
+# 1. Configurar LLM API Key (editar .env)
+# Abrir .env e adicionar:
+# GROQ_API_KEY=gsk_seu_token_aqui
 
-# 2. Iniciar stack completa (WAHA + n8n + API)
-./scripts/up-n8n.ps1
+# 2. APENAS ESTE COMANDO! (faz tudo)
+make up
+# → Sobe containers
+# → Auto-configura n8n
+# → Verifica WAHA
+# → Abre QR code se necessário
 
-# 3. Carregar base de conhecimento
-./scripts/load-knowledge.ps1
+# 3. Carregar conhecimento (apenas uma vez)
+make load-knowledge
 
-# 4. Configurar n8n
-# - Acesse http://localhost:5679
-# - Crie conta
-# - Instale community node: n8n-nodes-waha
-# - Importe workflow: n8n/workflows/chatbot_completo_orquestracao.json
-# - Configure credencial WAHA (Header Auth)
-# - Ative o workflow
+# 4. Ver comandos disponíveis
+make help
 
-# 5. Conectar WhatsApp
-./scripts/start-waha-session.ps1
-
-# 6. Testar
+# 5. Testar
 # Envie mensagem pelo WhatsApp
 ```
 
-## 📋 Requisitos
+## �️ Comandos Principais
+
+```bash
+make up              # Inicia todos os containers
+make down            # Para todos os containers
+make logs-api        # Logs da API
+make logs-n8n        # Logs do n8n
+make logs-waha       # Logs do WAHA
+make status          # Status dos containers
+make health          # Verifica health dos serviços
+make load-knowledge  # Carrega base de conhecimento
+make test            # Executa testes
+make lint            # Verifica qualidade do código
+make help            # Mostra todos os comandos
+```
+
+**💡 Dica:** Execute `make` ou `make help` para ver a lista completa de comandos disponíveis.
+
+## �📋 Requisitos
 
 - **Docker Desktop** (com Docker Compose v2)
-- **PowerShell** (scripts de automação)
+- **Make** (vem com Git Bash no Windows, ou instale via Chocolatey/WSL)
 - Chaves de API:
   - Groq ou OpenAI (para LLM)
   - WAHA (fixada no projeto)
