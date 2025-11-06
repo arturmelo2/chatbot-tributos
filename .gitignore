@@ -181,14 +181,22 @@ waha_data/
 n8n_data/
 exports/
 logs/
+data/
 
 # Credenciais sensíveis
 CREDENCIAIS_WAHA.md
 .env.local
 .env.production
 
-# Refactor notes (temporário)
-.refactor-notes.md
+# Reverse proxy
+reverse-proxy/acme.json
+
+# Backups
+backups/
+*.tar.gz
+
+# Compose backups
+compose.*.old.yml
 
 # IDE
 .vscode/

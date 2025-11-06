@@ -1,35 +1,125 @@
 # =============================================================================
 # Makefile - Chatbot de Tributos Nova Trento/SC
 # =============================================================================
-# Comandos úteis para desenvolvimento e operação
-#
-# Uso: make <target>
-# Lista de targets: make help
-# =============================================================================
 
-.PHONY: help install test lint format clean docker-build docker-up docker-down logs
+.PHONY: help up down restart logs logs-api logs-n8n logs-waha health rebuild clean backup restore \
+        test lint format install
 
-# Variáveis
-PYTHON := python
-PIP := pip
-DOCKER_COMPOSE := docker-compose
-PROJECT_NAME := tributos_chatbot
-
-# Cores para output
-GREEN := \033[0;32m
-YELLOW := \033[0;33m
-RED := \033[0;31m
-NC := \033[0m # No Color
-
-# -----------------------------------------------------------------------------
-# Help
-# -----------------------------------------------------------------------------
 help: ## Mostra esta mensagem de ajuda
-	@echo "$(GREEN)Chatbot de Tributos - Nova Trento/SC$(NC)"
+	@echo "Available commands:"
+	@echo "  make up          - Start all services"
+	@echo "  make down        - Stop all services"
+	@echo "  make restart     - Restart all services"
+	@echo "  make logs        - Follow all logs"
+	@echo "  make logs-api    - Follow API logs"
+	@echo "  make logs-n8n    - Follow n8n logs"
+	@echo "  make logs-waha   - Follow WAHA logs"
+	@echo "  make health      - Check all services health"
+	@echo "  make rebuild     - Rebuild and restart API"
+	@echo "  make clean       - Stop and remove all containers"
+	@echo "  make backup      - Backup all persistent data"
+	@echo "  make restore     - Restore from backup"
+	@echo "  make test        - Run tests with coverage"
+	@echo "  make lint        - Run linting checks"
+	@echo "  make format      - Format code with Black"
+	@echo "  make install     - Install dependencies"
+
+# -----------------------------------------------------------------------------
+# Docker Operations
+# -----------------------------------------------------------------------------
+up: ## Start all services
+	docker compose up -d
+
+down: ## Stop all services
+	docker compose down
+
+restart: ## Restart all services
+	docker compose restart
+
+logs: ## Follow all logs
+	docker compose logs -f
+
+logs-api: ## Follow API logs
+	docker compose logs -f api
+
+logs-n8n: ## Follow n8n logs
+	docker compose logs -f n8n
+
+logs-waha: ## Follow WAHA logs
+	docker compose logs -f waha
+
+rebuild: ## Rebuild and restart API
+	docker compose build --no-cache api
+	docker compose up -d api
+
+clean: ## Stop and remove all containers
+	docker compose down -v
+
+# -----------------------------------------------------------------------------
+# Health & Status
+# -----------------------------------------------------------------------------
+health: ## Check all services health
+	@echo "🔍 Checking services health..."
+	@docker compose ps
 	@echo ""
-	@echo "$(YELLOW)Targets disponíveis:$(NC)"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(NC) %s\n", $$1, $$2}'
+	@echo "API Health:"
+	@curl -s http://localhost:5000/health | python -m json.tool || echo "❌ API not responding"
 	@echo ""
+	@echo "n8n Health:"
+	@curl -s http://localhost:5678/healthz || echo "❌ n8n not responding"
+
+status: ## Show containers status
+	docker compose ps
+
+# -----------------------------------------------------------------------------
+# Data Management
+# -----------------------------------------------------------------------------
+backup: ## Backup all persistent data
+	@mkdir -p backups
+	tar -czf backups/chatbot-backup-$$(date +%Y%m%d-%H%M%S).tar.gz chroma_data/ waha_data/ n8n_data/
+	@echo "✅ Backup created in backups/"
+
+restore: ## Restore from backup
+	@echo "Available backups:"
+	@ls -lh backups/*.tar.gz 2>/dev/null || echo "No backups found"
+
+load-knowledge: ## Load knowledge base into ChromaDB
+	docker compose exec api python rag/load_knowledge.py
+
+# -----------------------------------------------------------------------------
+# Development
+# -----------------------------------------------------------------------------
+install: ## Install Python dependencies
+	pip install --upgrade pip
+	pip install -r requirements.txt
+	pip install -r requirements-dev.txt
+
+test: ## Run tests with coverage
+	pytest --cov=. --cov-report=html --cov-report=term-missing
+
+lint: ## Run linting checks
+	ruff check .
+	mypy .
+
+format: ## Format code with Black
+	black .
+
+format-check: ## Check code formatting
+	black --check .
+
+check: lint format-check test ## Run all checks (CI)
+
+# -----------------------------------------------------------------------------
+# Cleanup
+# -----------------------------------------------------------------------------
+clean-cache: ## Remove Python cache files
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name ".mypy_cache" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name ".ruff_cache" -exec rm -rf {} + 2>/dev/null || true
+	rm -rf htmlcov/ .coverage 2>/dev/null || true
+
+.DEFAULT_GOAL := help
 
 # -----------------------------------------------------------------------------
 # Instalação e Setup

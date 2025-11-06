@@ -5,6 +5,56 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.1.0] - 2025-11-06
+
+### 🔄 Refatoração Completa
+
+#### Adicionado
+- **Zero-Touch Deployment**: Nova estrutura para deploy 100% automatizado
+  - `reverse-proxy/traefik.yml`: Proxy reverso com HTTPS automático
+  - `reverse-proxy/acme.json`: Certificados SSL Let's Encrypt
+  - `scripts/wait-for.sh`: Helper para aguardar dependências de serviços
+  - `scripts/load-knowledge.sh`: Auto-load da base de conhecimento no boot
+- **Documentação Consolidada**:
+  - `docs/INDEX.md`: Índice navegável de toda documentação
+  - `.github/copilot-instructions.md`: Expandido com Quick Start e Zero-Touch (1900 linhas)
+  - `REFACTORING.md`: Changelog detalhado da refatoração
+- **Makefile Simplificado**: Comandos concisos para desenvolvimento e operação (100 linhas vs 200)
+
+#### Mudado
+- **Estrutura de Documentação**: 18 arquivos `.md` movidos da raiz para `docs/`
+  - Mantidos na raiz apenas: README, START-HERE, ARCHITECTURE, DEVELOPMENT, CONTRIBUTING, CHANGELOG, LICENSE
+  - Toda documentação específica agora em `docs/` com índice
+- **Makefile**: Refatorado para ser mais conciso e focado
+  - Comandos principais: `make up`, `make down`, `make logs`, `make health`, `make backup`
+  - Removida formatação desnecessária, mantido apenas funcionalidade essencial
+- **.gitignore**: Atualizado para incluir novos diretórios (`data/`, `reverse-proxy/acme.json`, `backups/`)
+
+#### Removido
+- **Arquivos Duplicados/Obsoletos**:
+  - `.env.minimal.example`, `.env.production.example` (mantido apenas `.env.example`)
+  - `compose.minimal.yml`, `compose.prod.caddy.yml` (backup em `compose.prod.old.yml`)
+  - `QUICK-START.bat`, `QUICK-START.ps1` (scripts PowerShell em `scripts/` são suficientes)
+  - Caches: `.mypy_cache/`, `.pytest_cache/`, `.ruff_cache/`, `.venv-2/`
+- **18 arquivos de documentação** da raiz (movidos para `docs/`, não deletados)
+
+#### Organizado
+- **Workflows n8n**: JSONs movidos de raiz para `n8n/workflows/`
+  - `chatbot_orquestracao_plus_menu.json`
+  - `n8n_workflow_waha_correto.json`
+
+### 📊 Estatísticas
+- **Arquivos criados**: 7 novos
+- **Arquivos movidos**: 18 (raiz → docs/)
+- **Arquivos removidos**: 10 duplicatas/obsoletos
+- **Linhas no Makefile**: -50% (200 → 100)
+- **Copilot Instructions**: +27% conteúdo útil (1500 → 1900 linhas)
+
+### 🔗 Ver Detalhes
+Para changelog completo da refatoração, veja: [REFACTORING.md](REFACTORING.md)
+
+---
+
 ## [1.0.0] - 2025-11-04
 
 ### 🎉 Release Inicial
